@@ -1,0 +1,54 @@
+<div class="list-group m-3 pt-2 pb-2">
+    <% if (!thongBaos || thongBaos.length===0) { %>
+        <div class="alert alert-warning">
+            <%= locals.message || 'Không có thông báo nào.' %>
+        </div>
+        <% } else { %>
+            <% thongBaos.forEach(function(tb) { %>
+                <a href="/mark-as-read/<%= tb.MaTB %>"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center <%= tb.TrangThai ? '1' : '0' %>">
+                    <div class="d-flex justify-content-between w-100">
+                        <div>
+                            <h5 class="mb-1">
+                                <%= tb.NoiDung %>
+                            </h5>
+                            <small class="text-muted">Lúc <%= tb.NgayTB %></small>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end w-100">
+                        <span class="badge rounded-pill <%= tb.LoaiTB === 'Tố cáo' ? 'bg-danger' : 'bg-custom' %>">
+                            <% if (tb.LoaiTB==='Bình luận' || tb.LoaiTB==='Xóa bình luận' ) { %>
+                                Bình luận
+                                <% } else if (['Bài viết', 'Duyệt bài viết' , 'Xóa bài viết' , 'Từ chối bài viết'
+                                    ].includes(tb.LoaiTB)) { %>
+                                    Bài viết
+                                    <% } else if (tb.LoaiTB==='Tố cáo' ) { %>
+                                        Tố cáo
+                                        <% } %>
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <form action="/xoa-thong-bao" method="POST" style="display:inline;">
+                            <input type="hidden" name="MaThongBao" value="<%= tb.MaTB %>">
+                            <button type="submit" class="badge rounded-pill bg-warning text-dark ms-2 mb-2">Xóa</button>
+                        </form>
+                    </div>
+                </a>
+                <% }); %>
+                    <% } %>
+
+                        <!-- Phân trang -->
+                        <% if (locals.totalPages && totalPages> 1) { %>
+                            <nav class="MenuTrang mt-3">
+                                <ul class="pagination justify-content-center">
+                                    <% for (let i=1; i <=totalPages; i++) { %>
+                                        <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                                            <a class="page-link" href="/thong-bao?page=<%= i %>">
+                                                <%= i %>
+                                            </a>
+                                        </li>
+                                        <% } %>
+                                </ul>
+                            </nav>
+                            <% } %>
+</div>

@@ -1,0 +1,108 @@
+<% if (locals.successMessage) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <%= successMessage %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+        <div class="container mt-5 mb-5">
+            <h2 class="text-primary mb-4 text-center">DANH SÁCH GÓP Ý</h2>
+
+            <% if (gopYs && gopYs.length> 0) { %>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-md-10">
+                        <% gopYs.forEach(function(item) { %>
+                            <div
+                                class="card mb-4 shadow-lg border-0 rounded-3 <%= item.TrangThai ? 'card-seen' : 'card-unseen' %>">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <img src="/Images/<%= item.ThanhVien && item.ThanhVien.AnhDaiDien ? item.ThanhVien.AnhDaiDien : 'default.png' %>"
+                                            alt="Avatar" class="avatar me-2" onerror="this.src='/Images/default.png'">
+                                        <h5 class="card-title mb-0 text-dark">
+                                            <%= item.ThanhVien ? item.ThanhVien.TenDangNhap : 'Ẩn danh' %>
+                                        </h5>
+                                        <% if (!item.TrangThai) { %>
+                                            <span class="badge bg-primary ms-2">Mới</span>
+                                            <% } %>
+                                    </div>
+
+                                    <div class="content-box p-4">
+                                        <span class="fw-bold">Nội dung:</span>
+                                        <p class="highlight-text mt-2 mb-0"><%- item.NoiDung %></p>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <small class="text-muted">
+                                            Ngày gửi: <%= item.NgayGui ? new
+                                                Date(item.NgayGui).toLocaleDateString('vi-VN') : 'N/A' %>
+                                        </small>
+                                        <% if (!item.TrangThai) { %>
+                                            <form action="/admin/gop-y/da-xu-ly/<%= item.ID %>" method="POST">
+                                                <button type="submit" class="btn btn-sm btn-outline-success">
+                                                    ✓ Đánh dấu đã xử lý
+                                                </button>
+                                            </form>
+                                            <% } else { %>
+                                                <span class="badge bg-success">Đã xử lý</span>
+                                                <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                </div>
+
+                <!-- Phân trang -->
+                <% if (totalPages> 1) { %>
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            <% for(let i=1; i <=totalPages; i++) { %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
+                                <% } %>
+                        </ul>
+                    </nav>
+                    <% } %>
+                        <% } else { %>
+                            <p class="text-muted text-center">Không có góp ý nào.</p>
+                            <% } %>
+        </div>
+
+        <style>
+            .card-unseen {
+                border-left: 5px solid #007bff;
+                background-color: #e9f7ff;
+            }
+
+            .card-seen {
+                border-left: 5px solid #0c88c2;
+                background-color: #f8f9fa;
+            }
+
+            .content-box {
+                background-color: #f1f3f5;
+                border-radius: 8px;
+                border-left: 5px solid #0c88c2;
+            }
+
+            .highlight-text {
+                color: #333;
+                font-size: 1.1rem;
+                line-height: 1.6;
+                font-weight: 500;
+                background-color: #d1ecf1;
+                padding: 10px;
+                border-radius: 5px;
+            }
+
+            .avatar {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid #0c88c2;
+            }
+        </style>

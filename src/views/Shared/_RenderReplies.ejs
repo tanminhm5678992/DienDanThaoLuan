@@ -1,0 +1,87 @@
+<% /* * _RenderReplies.ejs * Params (passed via locals): * binhLuans - full array of BinhLuan objects * parentId -
+    current parent MaBL (null for root) * maBV - MaBV of the post * replyToName - tên người được reply */ var
+    children=binhLuans.filter(function(x) { return String(x.IDCha)===String(parentId); }); %>
+
+    <% children.forEach(function(reply) { %>
+        <div class="post-container <%= reply.IsAdmin ? 'admin-comment' : '' %>" id="bl-<%= reply.MaBL %>">
+            <div class="row g-0">
+                <div class="col-2 d-flex flex-column align-items-center border-custom">
+                    <div class="avatar">
+                        <img src="/Images/<%= reply.avatarNguoiBL || 'default-avatar.png' %>" alt="Avatar">
+                    </div>
+                    <div class="pt-1">
+                        <a class="post-header" href="/thong-tin/<%= reply.MaNguoiGui %>">
+                            <%= reply.TenNguoiViet %>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-10 ps-2">
+                    <% if (reply.ReplyToContent) { %>
+                        <div class="reply-to-content">
+                            <strong>Replying to: '<%= replyToName %>'</strong>
+                            <div class="original-comment limit-line-text resize-img"><%- reply.ReplyToContent %></div>
+                        </div>
+                        <% } %>
+
+                            <div class="post-date">
+                                <%= reply.NgayGui %>
+                            </div>
+                            <div class="reply-content limit-text mb-3 resize-img">
+                                <%- reply.NDBL %>
+                                    <% if (reply.CodeContent) { %>
+                                        <div class="code-container">
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                            <button class="run-button" onclick="runCode(this)">Run</button>
+                                            <pre><code class="language codeBlock"><%= reply.CodeContent %></code></pre>
+                                            <div class="copy-notification">Code copied to clipboard!</div>
+                                        </div>
+                                        <% } %>
+                            </div>
+
+                            <button class="btn btn-outline-primary btn-sm reply-btn"
+                                onclick="showReplyInput('<%= reply.MaBL %>')">
+                                <i class="fas fa-reply me-1"></i>Reply
+                            </button>
+
+                            <% if (locals.userId) { %>
+                                <button class="report-button right-btn" onclick="showModal('<%= reply.MaBL %>')">Tố
+                                    cáo</button>
+                                <% } else if (locals.adminId) { %>
+                                    <button class="report-button right-btn"
+                                        onclick="showXacNhan('<%= reply.MaBL %>')">Xóa</button>
+                                    <% } %>
+
+                                        <!-- Reply input form -->
+                                        <div class="reply-input-wrap" id="reply-input-<%= reply.MaBL %>"
+                                            style="display:none;">
+                                            <form action="/dien-dan/them-binh-luan" method="POST" class="mt-2">
+                                                <input type="hidden" name="MaBV" value="<%= maBV %>">
+                                                <input type="hidden" name="IDCha" value="<%= reply.MaBL %>">
+                                                <div class="reply-box">
+                                                    <textarea class="content reply-input form-control mb-2"
+                                                        name="NoiDung" placeholder="Nhập câu trả lời..."
+                                                        style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#f0f0f5;border-radius:10px;min-height:70px;">
+                        </textarea>
+                                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                        <button type="button" class="btn-toggle-code toggleCodeEditor">
+                                                            <i class="fas fa-code me-1"></i>Hiển thị/Ẩn Mã Code
+                                                        </button>
+                                                        <button type="submit" class="btn-send">
+                                                            <i class="fas fa-paper-plane me-1"></i>Gửi
+                                                        </button>
+                                                    </div>
+                                                    <div class="codeEditorContainer" style="display:none;">
+                                                        <textarea name="CodeContent" class="reply-input codeContent"
+                                                            placeholder="Nhập mã code..."></textarea>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                </div>
+            </div>
+        </div>
+
+        <% // Đệ quy: render replies của reply này var nestedLocals=Object.assign({}, locals, { parentId: reply.MaBL,
+            replyToName: reply.TenNguoiViet }); %>
+            <%- include('_RenderReplies', nestedLocals) %>
+                <% }); %>

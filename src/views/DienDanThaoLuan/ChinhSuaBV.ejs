@@ -1,0 +1,115 @@
+<style>
+    pre {
+        background-color: #282a36;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    code {
+        display: block;
+        white-space: pre;
+    }
+
+    .code-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+</style>
+
+<% if (locals.successMessage) { %>
+    <div class="alert alert-success">
+        <%= successMessage %>
+    </div>
+    <% } %>
+
+        <div class="container mt-3 p-2 mb-4" style="background-color:white; border-radius:10px;">
+            <!-- Nút Xóa -->
+            <div class="d-flex justify-content-end">
+                <form action="/xoa-bai-viet/<%= baiViet.MaBV %>" method="POST" style="display:inline;"
+                    onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?')">
+                    <button type="submit" class="btn btn-danger">Xóa Bài Viết</button>
+                </form>
+            </div>
+
+            <!-- Form Chỉnh sửa — action đúng route -->
+            <form action="/chinh-sua/<%= baiViet.MaBV %>" method="POST">
+                <h2 class="text-center">CHỈNH SỬA BÀI VIẾT</h2>
+
+                <% if (locals.Loi) { %>
+                    <div class="alert alert-danger">
+                        <%= Loi %>
+                    </div>
+                    <% } %>
+
+                        <div class="form-group p-2">
+                            <label>Chủ đề:</label>
+                            <select name="MaCD" class="form-control mt-2" required>
+                                <% if (chuDeList && chuDeList.length> 0) { %>
+                                    <% chuDeList.forEach(function(cd) { %>
+                                        <option value="<%= cd.MaCD %>" <%=cd.MaCD==baiViet.MaCD ? 'selected' : '' %>>
+                                            <%= cd.TenCD %>
+                                        </option>
+                                        <% }); %>
+                                            <% } %>
+                            </select>
+                        </div>
+
+                        <div class="form-group p-2">
+                            <label>Tiêu đề bài viết:</label>
+                            <input type="text" name="TieuDeBV" class="form-control mt-2" value="<%= baiViet.TieuDeBV %>"
+                                required>
+                        </div>
+
+                        <div class="form-group p-2">
+                            <label for="content" style="font-size:20px; font-weight:bold;">Nội dung bài viết:</label>
+                            <textarea name="NoiDung" class="content form-control mt-2"
+                                rows="10"><%- noiDungVanBan %></textarea>
+                        </div>
+
+                        <% if (locals.codeContent && codeContent) { %>
+                            <div class="codeEditorContainer">
+                                <div class="form-group p-2">
+                                    <label for="codeContent" style="font-size:20px; font-weight:bold;">Code:</label>
+                                    <textarea name="CodeContent" id="Code"
+                                        class="form-control mt-2 codeContent"><%- codeContent %></textarea>
+                                </div>
+                            </div>
+                            <% } else { %>
+                                <div class="form-group p-2">
+                                    <button type="button" class="toggleCodeEditor btn btn-secondary">Hiển thị/Ẩn Mã
+                                        Code</button>
+                                </div>
+                                <div class="codeEditorContainer" style="display:none;">
+                                    <div class="form-group p-2">
+                                        <label for="codeContent" style="font-size:20px; font-weight:bold;">Code:</label>
+                                        <textarea name="CodeContent" class="codeContent form-control mt-2" rows="10"
+                                            placeholder="Nhập mã code"></textarea>
+                                    </div>
+                                </div>
+                                <% } %>
+
+                                    <div class="d-flex justify-content-end p-2">
+                                        <button type="submit" class="btn btn-primary">Gửi Lại Bài Viết</button>
+                                    </div>
+            </form>
+        </div>
+
+        <% if (locals.codeContent && codeContent) { %>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const textArea = document.getElementById('Code');
+                    if (textArea && !textArea.CodeMirrorInstance) {
+                        textArea.CodeMirrorInstance = CodeMirror.fromTextArea(textArea, {
+                            lineNumbers: true, theme: 'darcula', lineWrapping: true
+                        });
+                    }
+                });
+            </script>
+            <% } %>
+
+                <%- include('../Shared/_EditorScripts') %>

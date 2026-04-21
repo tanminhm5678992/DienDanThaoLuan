@@ -1,0 +1,22 @@
+<div class="feedback-container">
+    <form action="/gop-y" method="POST">
+        <h2>Phản Hồi & Góp Ý</h2>
+        <div class="form-group">
+            <% if (locals.thongBao) { %>
+                <div class="response-message success">
+                    <%= thongBao %>
+                </div>
+                <% } %>
+                    <% if (locals.Loi) { %>
+                        <div class="response-message error">
+                            <%= Loi %>
+                        </div>
+                        <% } %>
+
+                            <label for="feedback-content">Nội dung góp ý:</label>
+                            <textarea id="feedback-content" name="NoiDung" rows="5"
+                                placeholder="Nhập góp ý của bạn..."></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Gửi Góp Ý</button>
+    </form>
+</div>

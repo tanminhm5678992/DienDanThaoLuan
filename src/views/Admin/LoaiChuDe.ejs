@@ -1,0 +1,107 @@
+<% if (locals.successMessage) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <%= successMessage %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+        <% if (locals.errorMessage) { %>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <%= errorMessage %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <% } %>
+
+                <h2 style="text-align:center" class="p-2">QUẢN LÝ LOẠI CHỦ ĐỀ</h2>
+
+                <div class="mb-3">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemLoai">
+                        + Tạo mới
+                    </button>
+                </div>
+
+                <div style="background-color:white; border-radius:15px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1);">
+                    <table class="table table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th style="text-align:center; width:80px;">STT</th>
+                                <th>Tên loại chủ đề</th>
+                                <th style="text-align:center; width:150px;">Tùy chỉnh</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (loaiCDs && loaiCDs.length> 0) { %>
+                                <% loaiCDs.forEach(function(item, idx) { %>
+                                    <tr>
+                                        <td style="text-align:center;">
+                                            <%= idx + 1 %>
+                                        </td>
+                                        <td>
+                                            <%= item.TenLoai %>
+                                        </td>
+                                        <td style="text-align:center;">
+                                            <button class="btn btn-warning btn-sm"
+                                                onclick="editLoai('<%= item.MaLoai %>', '<%= item.TenLoai %>')">Sửa</button>
+                                            <form action="/admin/quan-ly/loai-chu-de/xoa/<%= item.MaLoai %>"
+                                                method="POST" style="display:inline"
+                                                onsubmit="return confirm('Xóa loại chủ đề này?')">
+                                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted">Chưa có loại chủ đề nào.
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Modal Thêm / Sửa Loại Chủ Đề -->
+                <div class="modal fade" id="modalThemLoai" tabindex="-1">
+                    <div class="modal-dialog" style="max-width:500px;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalLoaiTitle">Thêm Loại Chủ Đề Mới</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form id="formLoai" action="/admin/quan-ly/loai-chu-de/them" method="POST">
+                                <div class="modal-body">
+                                    <input type="hidden" id="editMaLoai" name="_editMaLoai" value="">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Tên loại:</label>
+                                        <input type="text" name="TenLoai" id="inputTenLoai" class="form-control"
+                                            placeholder="Nhập tên loại chủ đề..." required>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Đóng</button>
+                                    <button type="submit" class="btn btn-primary" id="btnSubmitLoai">Tạo</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function editLoai(maLoai, tenLoai) {
+                        document.getElementById('modalLoaiTitle').textContent = 'Sửa Loại Chủ Đề';
+                        document.getElementById('inputTenLoai').value = tenLoai;
+                        document.getElementById('btnSubmitLoai').textContent = 'Lưu';
+                        // Đổi action sang route sửa — cần thêm route POST /admin/quan-ly/loai-chu-de/sua/:id
+                        document.getElementById('formLoai').action = '/admin/quan-ly/loai-chu-de/sua/' + maLoai;
+                        new bootstrap.Modal(document.getElementById('modalThemLoai')).show();
+                    }
+
+                    // Reset modal khi mở để thêm mới
+                    document.getElementById('modalThemLoai').addEventListener('show.bs.modal', function (e) {
+                        if (!e.relatedTarget) return; // mở bằng JS (editLoai) — không reset
+                        document.getElementById('modalLoaiTitle').textContent = 'Thêm Loại Chủ Đề Mới';
+                        document.getElementById('inputTenLoai').value = '';
+                        document.getElementById('btnSubmitLoai').textContent = 'Tạo';
+                        document.getElementById('formLoai').action = '/admin/quan-ly/loai-chu-de/them';
+                    });
+                </script>

@@ -1,0 +1,190 @@
+<style>
+    #menu {
+        background: #0d0d14;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        position: relative;
+        z-index: 99;
+    }
+
+    #menu .navbar {
+        padding: 0;
+    }
+
+    #menu .nav-link {
+        color: rgba(255, 255, 255, 0.65) !important;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        padding: 0.75rem 0.9rem !important;
+        transition: color 0.2s;
+        position: relative;
+    }
+
+    #menu .nav-link:hover,
+    #menu .nav-link.active {
+        color: #4f8ef7 !important;
+    }
+
+    #menu .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0.9rem;
+        right: 0.9rem;
+        height: 2px;
+        background: linear-gradient(90deg, #4f8ef7, #a78bfa);
+        border-radius: 2px;
+    }
+
+    #menu .dropdown-menu {
+        background: #111118;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        margin-top: 0 !important;
+    }
+
+    #menu .dropdown-item {
+        color: #d0d0e0;
+        font-size: 0.83rem;
+        padding: 0.5rem 1rem;
+        transition: background 0.15s, color 0.15s;
+    }
+
+    #menu .dropdown-item:hover {
+        background: rgba(79, 142, 247, 0.1);
+        color: #4f8ef7;
+    }
+
+    #menu .badge {
+        font-size: 0.65rem;
+        padding: 2px 5px;
+    }
+</style>
+
+<div id="menu">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                style="border-color:rgba(255,255,255,0.2)">
+                <span class="navbar-toggler-icon" style="filter:invert(1)"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">TRANG CHỦ</a>
+                    </li>
+
+                    <!-- Chủ đề dropdown -->
+                    <% if (locals.loaiCDs && loaiCDs.length> 0) { %>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">CHỦ
+                                ĐỀ</a>
+                            <ul class="dropdown-menu">
+                                <% loaiCDs.forEach(function(cd) { %>
+                                    <li><a class="dropdown-item" href="/chu-de/<%= cd.MaLoai %>">
+                                            <%= cd.TenLoai %>
+                                        </a></li>
+                                    <% }); %>
+                            </ul>
+                        </li>
+                        <% } %>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="/bai-viet-moi">BÀI VIẾT MỚI</a>
+                            </li>
+
+                            <!-- Góp ý -->
+                            <% if (locals.adminId) { %>
+                                <li class="nav-item">
+                                    <a class="nav-link position-relative" href="/admin/gop-y">
+                                        GÓP Ý
+                                        <% if (locals.soLuongGopY> 0) { %>
+                                            <span
+                                                class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                                                <%= soLuongGopY %>
+                                            </span>
+                                            <% } %>
+                                    </a>
+                                </li>
+                                <% } else if (locals.userId) { %>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/gop-y">GÓP Ý</a>
+                                    </li>
+                                    <% } %>
+
+                                        <!-- Thông báo -->
+                                        <% if (locals.userId || locals.adminId) { %>
+                                            <li class="nav-item">
+                                                <a class="nav-link position-relative" href="/thong-bao">
+                                                    THÔNG BÁO
+                                                    <% if (locals.unreadCount> 0) { %>
+                                                        <span
+                                                            class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                                                            <%= unreadCount %>
+                                                        </span>
+                                                        <% } %>
+                                                </a>
+                                            </li>
+                                            <% } %>
+
+                                                <li class="nav-item">
+                                                    <a class="nav-link" href="/code/execution-result">RUN CODE</a>
+                                                </li>
+
+                                                <!-- Admin only -->
+                                                <% if (locals.adminId) { %>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link position-relative" href="/admin/duyet-bai">
+                                                            DUYỆT BÀI
+                                                            <% if (locals.soLuongBaiViet> 0) { %>
+                                                                <span
+                                                                    class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                                                                    <%= soLuongBaiViet %>
+                                                                </span>
+                                                                <% } %>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item dropdown">
+                                                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                                                            data-bs-toggle="dropdown">QUẢN LÝ CHỦ ĐỀ</a>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a class="dropdown-item"
+                                                                    href="/admin/quan-ly/loai-chu-de">Loại chủ đề</a>
+                                                            </li>
+                                                            <li><a class="dropdown-item"
+                                                                    href="/admin/quan-ly/chu-de">Chủ đề</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" href="/admin/quan-ly-thanh-vien">QUẢN LÝ
+                                                            THÀNH VIÊN</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" href="/admin/thong-bao-tong">THÔNG BÁO
+                                                            TỔNG</a>
+                                                    </li>
+                                                    <% } %>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const path = window.location.pathname;
+        document.querySelectorAll('#menu .nav-link').forEach(link => {
+            try {
+                if (link.classList.contains('dropdown-toggle')) {
+                    const items = link.closest('li').querySelectorAll('.dropdown-item');
+                    items.forEach(item => {
+                        if (new URL(item.href).pathname === path) link.classList.add('active');
+                    });
+                    return;
+                }
+                if (new URL(link.href).pathname === path) link.classList.add('active');
+            } catch (e) { }
+        });
+    });
+</script>

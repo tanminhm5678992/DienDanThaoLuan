@@ -1,0 +1,50 @@
+<style>
+    .marquee-wrap {
+        background: linear-gradient(90deg, rgba(79, 142, 247, 0.12), rgba(167, 139, 250, 0.12));
+        border-top: 1px solid rgba(79, 142, 247, 0.15);
+        border-bottom: 1px solid rgba(79, 142, 247, 0.15);
+        overflow: hidden;
+        position: relative;
+        z-index: 98;
+        padding: 0.5rem 0;
+    }
+
+    .marquee-inner {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        animation: marquee 10s linear infinite;
+    }
+
+    .marquee-inner:hover {
+        animation-play-state: paused;
+    }
+
+    @keyframes marquee {
+        0% {
+            transform: translateX(100vw);
+        }
+
+        100% {
+            transform: translateX(-100%);
+        }
+    }
+
+    .marquee-inner p {
+        color: rgba(0, 0, 0, 0.85);
+        font-size: 0.88rem;
+        margin: 0;
+        letter-spacing: 0.02em;
+    }
+</style>
+
+<div class="marquee-wrap">
+    <div class="marquee-inner">
+        <% if (locals.thongBaoMarquee) { %>
+            <p>🎄🎄💯🌟❤️💕💗 &nbsp;<%= thongBaoMarquee %>&nbsp; 💗💕❤️🌟💯🎄🎄</p>
+            <% } else { %>
+                <p>🌟 Chào mừng đến với IT Xperience! Khám phá những kiến thức mới và kết nối với những người đam mê
+                    công nghệ! 🌟</p>
+                <% } %>
+    </div>
+</div>

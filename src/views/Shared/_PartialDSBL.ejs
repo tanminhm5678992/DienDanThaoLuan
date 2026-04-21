@@ -1,0 +1,373 @@
+<% /* * _PartialDSBL.ejs * Params: * binhLuans - mảng bình luận (đã phân trang - page hiện tại) * maBV - mã bài viết *
+    currentPage - trang hiện tại * totalPages - tổng số trang */ var rootComments=binhLuans.filter(function(x) { return
+    !x.IDCha; }); %>
+
+    <style>
+        .post-container {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+
+        .post-container:hover {
+            border-color: rgba(79, 142, 247, 0.2);
+        }
+
+        .post-container.admin-comment {
+            background: rgba(79, 142, 247, 0.04);
+            border-left: 3px solid #4f8ef7;
+        }
+
+        .border-custom {
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            padding-right: 0.75rem;
+        }
+
+        .avatar img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(79, 142, 247, 0.25);
+        }
+
+        .post-header {
+            color: #4f8ef7;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+            transition: color 0.2s;
+        }
+
+        .post-header:hover {
+            color: #a78bfa;
+        }
+
+        .post-date {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.78rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .reply-content,
+        .limit-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .limit-line-text {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 3em;
+        }
+
+        .reply-to-content {
+            background: rgba(79, 142, 247, 0.06);
+            border-left: 3px solid #4f8ef7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .reply-to-content strong {
+            color: #4f8ef7;
+        }
+
+        .original-comment {
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+        }
+
+        .reply-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 0.8rem;
+            border-color: rgba(79, 142, 247, 0.4);
+            color: #4f8ef7;
+            padding: 0.25rem 0.7rem;
+            border-radius: 6px;
+        }
+
+        .reply-btn:hover {
+            background: rgba(79, 142, 247, 0.1);
+            border-color: #4f8ef7;
+        }
+
+        .report-button {
+            position: absolute;
+            bottom: 10px;
+            right: 90px;
+            background: transparent;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            color: #f87171;
+            font-size: 0.78rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .report-button:hover {
+            background: rgba(248, 113, 113, 0.1);
+            border-color: #f87171;
+        }
+
+        /* Code container */
+        .code-container {
+            position: relative;
+            background: #1a1a2e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            margin-top: 0.75rem;
+            overflow: hidden;
+        }
+
+        .code-container pre {
+            margin: 0;
+            padding: 1rem;
+        }
+
+        .code-container code {
+            font-size: 0.85rem;
+        }
+
+        .copy-button,
+        .run-button {
+            position: absolute;
+            top: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-button {
+            right: 80px;
+        }
+
+        .run-button {
+            right: 10px;
+        }
+
+        .copy-button:hover,
+        .run-button:hover {
+            background: rgba(79, 142, 247, 0.2);
+            border-color: rgba(79, 142, 247, 0.4);
+            color: #4f8ef7;
+        }
+
+        .copy-notification {
+            display: none;
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: #34d399;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 5px;
+        }
+
+        /* Reply input */
+        .reply-input-wrap {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-toggle-code {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            border-radius: 7px;
+            padding: 0.35rem 0.8rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-toggle-code:hover {
+            background: rgba(79, 142, 247, 0.1);
+            border-color: rgba(79, 142, 247, 0.3);
+            color: #4f8ef7;
+        }
+
+        .btn-send {
+            background: linear-gradient(135deg, #4f8ef7, #a78bfa);
+            border: none;
+            color: white;
+            padding: 0.35rem 1rem;
+            border-radius: 7px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-send:hover {
+            opacity: 0.85;
+        }
+
+        /* Pagination */
+        .pagination-wrap {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 0.4rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover,
+        .page-btn.active {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: rgba(79, 142, 247, 0.4);
+            color: #4f8ef7;
+        }
+
+        .page-btn.active {
+            font-weight: 700;
+        }
+
+        .page-btn.disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+    </style>
+
+    <% rootComments.forEach(function(bl) { %>
+        <div class="post-container <%= bl.IsAdmin ? 'admin-comment' : '' %>" id="bl-<%= bl.MaBL %>">
+            <div class="row g-0">
+                <div class="col-2 d-flex flex-column align-items-center border-custom">
+                    <div class="avatar">
+                        <img src="/Images/<%= bl.avatarNguoiBL || 'default-avatar.png' %>" alt="Avatar">
+                    </div>
+                    <div class="pt-1">
+                        <a class="post-header" href="/thong-tin/<%= bl.MaNguoiGui %>">
+                            <%= bl.TenNguoiViet %>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-10 ps-2">
+                    <div class="post-date">
+                        <%= bl.NgayGui %>
+                    </div>
+                    <div class="reply-content limit-text resize-img">
+                        <%- bl.NDBL %>
+                            <% if (bl.CodeContent) { %>
+                                <div class="code-container">
+                                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                    <button class="run-button" onclick="runCode(this)">Run</button>
+                                    <pre><code class="language codeBlock"><%= bl.CodeContent %></code></pre>
+                                    <div class="copy-notification">Code copied to clipboard!</div>
+                                </div>
+                                <% } %>
+                    </div>
+
+                    <button class="btn btn-outline-primary btn-sm reply-btn" onclick="showReplyInput('<%= bl.MaBL %>')">
+                        <i class="fas fa-reply me-1"></i>Reply
+                    </button>
+                    <% if (locals.userId) { %>
+                        <button class="report-button" onclick="showModal('<%= bl.MaBL %>')">Tố cáo</button>
+                        <% } else if (locals.adminId) { %>
+                            <button class="report-button" onclick="showXacNhan('<%= bl.MaBL %>')">Xóa</button>
+                            <% } %>
+
+                                <!-- Reply form -->
+                                <div class="reply-input-wrap" id="reply-input-<%= bl.MaBL %>" style="display:none;">
+                                    <form action="/dien-dan/them-binh-luan" method="POST">
+                                        <input type="hidden" name="MaBV" value="<%= maBV %>">
+                                        <input type="hidden" name="IDCha" value="<%= bl.MaBL %>">
+                                        <textarea class="content reply-input form-control mb-2" name="NoiDung"
+                                            placeholder="Nhập câu trả lời..."
+                                            style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#f0f0f5;border-radius:10px;min-height:70px;">
+                    </textarea>
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <button type="button" class="btn-toggle-code toggleCodeEditor">
+                                                <i class="fas fa-code me-1"></i>Hiển thị/Ẩn Mã Code
+                                            </button>
+                                            <button type="submit" class="btn-send">
+                                                <i class="fas fa-paper-plane me-1"></i>Gửi
+                                            </button>
+                                        </div>
+                                        <div class="codeEditorContainer" style="display:none;">
+                                            <textarea name="CodeContent" class="reply-input codeContent"
+                                                placeholder="Nhập mã code..."></textarea>
+                                        </div>
+                                    </form>
+                                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Render replies đệ quy -->
+        <%- include('_RenderReplies', { binhLuans: binhLuans, parentId: bl.MaBL, maBV: maBV, replyToName:
+            bl.TenNguoiViet, userId: locals.userId, adminId: locals.adminId }) %>
+            <% }); %>
+
+                <!-- Phân trang -->
+                <% if (locals.totalPages && totalPages> 1) { %>
+                    <div class="pagination-wrap mb-4">
+                        <a href="?page=<%= currentPage - 1 %>&id=<%= maBV %>"
+                            class="page-btn <%= currentPage <= 1 ? 'disabled' : '' %>">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        <% for (var p=1; p <=totalPages; p++) { %>
+                            <a href="?page=<%= p %>&id=<%= maBV %>"
+                                class="page-btn <%= p === currentPage ? 'active' : '' %>">
+                                <%= p %>
+                            </a>
+                            <% } %>
+                                <a href="?page=<%= currentPage + 1 %>&id=<%= maBV %>"
+                                    class="page-btn <%= currentPage >= totalPages ? 'disabled' : '' %>">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                    </div>
+                    <% } %>
+
+                        <script>
+                            function showReplyInput(maBL) {
+                                document.querySelectorAll('.reply-input-wrap').forEach(function (el) {
+                                    if (el.id !== 'reply-input-' + maBL) el.style.display = 'none';
+                                });
+                                var el = document.getElementById('reply-input-' + maBL);
+                                el.style.display = el.style.display === 'none' ? 'block' : 'none';
+                            }
+                            function copyCode(btn) {
+                                var code = btn.closest('.code-container').querySelector('code').innerText;
+                                navigator.clipboard.writeText(code).then(function () {
+                                    var notif = btn.closest('.code-container').querySelector('.copy-notification');
+                                    notif.style.display = 'block';
+                                    setTimeout(function () { notif.style.display = 'none'; }, 2000);
+                                });
+                            }
+                        </script>

@@ -1,0 +1,97 @@
+<style>
+    pre {
+        background-color: #282a36;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    code {
+        display: block;
+        white-space: pre;
+    }
+
+    .code-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container mt-4 mb-4">
+    <div class="card p-4">
+        <h5 class="mb-3">
+            <strong>Chủ đề:</strong>
+            <i>
+                <%= baiViet.ChuDe ? baiViet.ChuDe.TenCD : 'N/A' %>
+            </i>
+        </h5>
+        <h5 class="mb-3">
+            <strong>Tiêu đề bài viết:</strong>
+            <i>
+                <%= baiViet.TieuDeBV %>
+            </i>
+        </h5>
+        <h6 class="text-muted mb-3">
+            Tác giả: <%= baiViet.ThanhVien ? baiViet.ThanhVien.TenDangNhap : 'N/A' %> &nbsp;|&nbsp;
+                Ngày đăng: <%= baiViet.NgayDang ? new Date(baiViet.NgayDang).toLocaleString('vi-VN') : 'N/A' %>
+        </h6>
+
+        <h5 class="mb-2"><strong>Nội dung:</strong></h5>
+        <div class="border p-3 rounded mb-4">
+            <%- noiDungVanBan %>
+        </div>
+
+        <% if (codeContent) { %>
+            <div class="code-container">
+                <pre><code class="language" id="codeBlock"><%= codeContent %></code></pre>
+            </div>
+            <% } %>
+
+                <div class="row g-2 mt-2">
+                    <div class="col-md-4">
+                        <a href="/admin/duyet-bai" class="btn btn-secondary w-100">← Quay lại</a>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-danger w-100" id="btnTuChoi">Từ chối</button>
+                    </div>
+                    <div class="col-md-4">
+                        <form action="/admin/duyet-bai/<%= baiViet.MaBV %>" method="POST">
+                            <button type="submit" class="btn btn-primary w-100">Duyệt bài</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Form từ chối -->
+                <div id="lyDoTuChoiSection" style="display:none; margin-top: 20px;">
+                    <div id="customNotification" class="alert alert-danger" style="display:none;"></div>
+                    <form action="/admin/tu-choi-bai/<%= baiViet.MaBV %>" method="POST">
+                        <label class="mb-2 fw-bold" style="font-size:18px">Lý do từ chối:</label>
+                        <textarea name="lydo" class="form-control" rows="3" placeholder="Nhập lý do từ chối bài viết"
+                            required></textarea>
+                        <input type="hidden" name="trangthai" value="tuChoi">
+                        <div class="d-flex gap-2 mt-2">
+                            <button type="submit" class="btn btn-danger">Xác nhận</button>
+                            <button type="button" class="btn btn-secondary" id="btnHuyTuChoi">Hủy</button>
+                        </div>
+                    </form>
+                </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof hljs !== 'undefined') hljs.highlightAll();
+    });
+    document.getElementById("btnTuChoi").addEventListener("click", function () {
+        document.getElementById("lyDoTuChoiSection").style.display = "block";
+        this.style.display = "none";
+    });
+    document.getElementById("btnHuyTuChoi").addEventListener("click", function () {
+        document.getElementById("lyDoTuChoiSection").style.display = "none";
+        document.getElementById("btnTuChoi").style.display = "inline-block";
+    });
+</script>

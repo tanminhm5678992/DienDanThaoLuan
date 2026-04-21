@@ -1,0 +1,209 @@
+<style>
+    .custom-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .custom-modal-overlay.show {
+        display: flex;
+    }
+
+    .custom-modal-box {
+        background: #111118;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 2rem;
+        width: 100%;
+        max-width: 400px;
+        position: relative;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .custom-modal-box h4,
+    .custom-modal-box h3 {
+        color: #f0f0f5;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .modal-close-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 1.3rem;
+        cursor: pointer;
+        transition: color 0.2s;
+        line-height: 1;
+    }
+
+    .modal-close-btn:hover {
+        color: #f87171;
+    }
+
+    .modal-select {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: #f0f0f5;
+        font-size: 0.9rem;
+        outline: none;
+        margin-bottom: 1rem;
+    }
+
+    .modal-select:focus {
+        border-color: #4f8ef7;
+    }
+
+    .modal-select option {
+        background: #111118;
+    }
+
+    .btn-modal-confirm {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #4f8ef7, #a78bfa);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .btn-modal-confirm:hover {
+        opacity: 0.85;
+    }
+
+    .btn-modal-danger {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #f87171, #ef4444);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .btn-modal-danger:hover {
+        opacity: 0.85;
+    }
+
+    #lydo {
+        display: none;
+    }
+</style>
+
+<!-- Modal Tố cáo (User) -->
+<% if (locals.userId) { %>
+    <div class="custom-modal-overlay" id="reportModal">
+        <div class="custom-modal-box">
+            <button class="modal-close-btn" onclick="closeModal()">×</button>
+            <h3>Vui lòng chọn lý do tố cáo</h3>
+            <form action="/dien-dan/luu-ly-do-to-cao" method="POST">
+                <input type="hidden" id="IdDoiTuongReport" name="IdDoiTuong">
+                <select name="LyDoToCao" class="modal-select" required>
+                    <option value="Spam">Spam</option>
+                    <option value="Nội dung không phù hợp">Nội dung không phù hợp</option>
+                    <option value="Ngôn từ đả kích">Ngôn từ đả kích</option>
+                    <option value="Lừa đảo, gian lận">Lừa đảo, gian lận</option>
+                </select>
+                <button type="submit" class="btn-modal-confirm">Xác nhận tố cáo</button>
+            </form>
+        </div>
+    </div>
+    <% } %>
+
+        <!-- Modal Xóa (Admin) -->
+        <% if (locals.adminId) { %>
+            <div class="custom-modal-overlay" id="delModal">
+                <div class="custom-modal-box">
+                    <button class="modal-close-btn" onclick="closeXacNhan()">×</button>
+                    <div id="del">
+                        <h4>Xác nhận xóa nội dung này?</h4>
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn-modal-danger" onclick="showLyDoXoa()">Xác nhận xóa</button>
+                        </div>
+                    </div>
+                    <div id="lydo">
+                        <h3>Vui lòng chọn lý do xóa</h3>
+                        <form action="/admin/xoa-bv-bl" method="POST">
+                            <input type="hidden" id="IdDoiTuongDel" name="IdDoiTuong">
+                            <select name="LyDoXoa" class="modal-select" required>
+                                <option value="Spam">Spam</option>
+                                <option value="Nội dung không phù hợp">Nội dung không phù hợp</option>
+                                <option value="Ngôn từ đả kích">Ngôn từ đả kích</option>
+                                <option value="Lừa đảo, gian lận">Lừa đảo, gian lận</option>
+                            </select>
+                            <button type="submit" class="btn-modal-confirm">Xác nhận</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+                <script>
+                    function showModal(id) {
+                        document.getElementById('IdDoiTuongReport').value = id;
+                        document.getElementById('reportModal').classList.add('show');
+                    }
+                    function closeModal() {
+                        document.getElementById('reportModal').classList.remove('show');
+                    }
+                    function showXacNhan(id) {
+                        document.getElementById('IdDoiTuongDel').value = id;
+                        document.getElementById('delModal').classList.add('show');
+                    }
+                    function showLyDoXoa() {
+                        document.getElementById('del').style.display = 'none';
+                        document.getElementById('lydo').style.display = 'block';
+                    }
+                    function closeXacNhan() {
+                        document.getElementById('delModal').classList.remove('show');
+                        document.getElementById('del').style.display = 'block';
+                        document.getElementById('lydo').style.display = 'none';
+                    }
+                    // Close on overlay click
+                    ['reportModal', 'delModal'].forEach(function (id) {
+                        var el = document.getElementById(id);
+                        if (!el) return;
+                        el.addEventListener('click', function (e) {
+                            if (e.target === el) {
+                                el.classList.remove('show');
+                                if (id === 'delModal') {
+                                    document.getElementById('del').style.display = 'block';
+                                    document.getElementById('lydo').style.display = 'none';
+                                }
+                            }
+                        });
+                    });
+                </script>

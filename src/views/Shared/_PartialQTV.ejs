@@ -1,0 +1,86 @@
+<% /* * _PartialQTV.ejs * Params: danhSachQTV - array of QuanTriVien */ %>
+    <style>
+        .sidebar-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-card-header {
+            background: linear-gradient(135deg, rgba(0, 94, 255, 0.15), rgba(64, 0, 255, 0.15));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0.65rem 1rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-list-item {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: rgba(47, 45, 45, 0.7);
+            font-size: 0.85rem;
+            transition: background 0.15s;
+        }
+
+        .sidebar-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar-list-item:hover {
+            background: rgba(79, 142, 247, 0.05);
+        }
+
+        .sidebar-list-item img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(79, 142, 247, 0.3);
+        }
+
+        .sidebar-list-item a {
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+
+        .sidebar-list-item a:hover {
+            color: #4f8ef7;
+        }
+
+        .badge-count {
+            margin-left: auto;
+            background: rgba(79, 142, 247, 0.15);
+            color: #4f8ef7;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+    </style>
+
+    <div class="sidebar-card">
+        <div class="sidebar-card-header">👑 Quản trị viên</div>
+        <% if (locals.danhSachQTV && danhSachQTV.length> 0) { %>
+            <% danhSachQTV.forEach(function(qtv) { %>
+                <div class="sidebar-list-item">
+                    <img src="/Images/<%= qtv.AnhDaiDien || 'default-avatar.png' %>" alt="Avatar">
+                    <span>
+                        <%= qtv.TenDangNhap %>
+                    </span>
+                </div>
+                <% }); %>
+                    <% } else { %>
+                        <div class="sidebar-list-item" style="color:rgba(255,255,255,0.3);">Không có dữ liệu</div>
+                        <% } %>
+    </div>

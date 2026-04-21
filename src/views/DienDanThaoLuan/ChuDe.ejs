@@ -1,0 +1,59 @@
+<!-- Breadcrumb -->
+<div class="container mt-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/chu-de/<%= MaLoai %>" style="text-decoration: none; color: black; font-size: 22px">
+                    <%= TenLoai %>
+                </a>
+            </li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row my-5">
+    <!-- Left Column -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <% if (!chuDes || chuDes.length===0) { %>
+                <div class="alert alert-warning m-2">
+                    <%= locals.message || 'Không có chủ đề nào.' %>
+                </div>
+                <% } %>
+                    <ul class="list-group list-group-flush">
+                        <% if (chuDes && chuDes.length> 0) { %>
+                            <% chuDes.forEach(function(cd) { %>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>💬 <a
+                                            href="/bai-viet-theo-chu-de/<%= cd.MaCD %>?tenloai=<%= encodeURIComponent(cd.TenLoai) %>"
+                                            class="tencd">
+                                            <%= cd.TenCD %>
+                                        </a></span>
+                                    <span class="posts">Số bài: <%= cd.SoBai %></span>
+                                </li>
+                                <% }); %>
+                                    <% } %>
+                    </ul>
+        </div>
+
+        <!-- Phân trang -->
+        <% if (locals.totalPages && totalPages> 1) { %>
+            <nav class="MenuTrang mt-3">
+                <ul class="pagination justify-content-center">
+                    <% for (let i=1; i <=totalPages; i++) { %>
+                        <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                            <a class="page-link" href="/chu-de/<%= MaLoai %>?page=<%= i %>">
+                                <%= i %>
+                            </a>
+                        </li>
+                        <% } %>
+                </ul>
+            </nav>
+            <% } %>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-md-4">
+        <%- include('../Shared/_PartialQTV') %>
+    </div>
+</div>

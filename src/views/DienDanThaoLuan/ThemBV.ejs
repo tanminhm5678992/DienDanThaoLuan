@@ -1,0 +1,63 @@
+<% if (locals.successMessage) { %>
+    <div class="alert alert-success">
+        <%= successMessage %>
+    </div>
+    <% } %>
+
+        <form action="/them-bai-viet" method="POST">
+            <div class="container mt-3 p-2 mb-4" style="background-color:white; border-radius:10px;">
+                <h2 class="text-center">Thêm Bài Viết Mới</h2>
+
+                <% if (locals.Loi) { %>
+                    <div class="alert alert-danger">
+                        <%= Loi %>
+                    </div>
+                    <% } %>
+
+                        <div class="form-group p-2">
+                            <label>Chọn chủ đề:</label>
+                            <!-- Sửa: dùng chuDeList (khớp với controller) -->
+                            <select name="MaCD" class="form-control mt-2" required>
+                                <option value="">Chọn chủ đề</option>
+                                <% if (chuDeList && chuDeList.length> 0) { %>
+                                    <% chuDeList.forEach(function(cd) { %>
+                                        <option value="<%= cd.MaCD %>">
+                                            <%= cd.TenCD %>
+                                        </option>
+                                        <% }); %>
+                                            <% } %>
+                            </select>
+                        </div>
+
+                        <div class="form-group p-2">
+                            <label for="title">Tiêu đề bài viết:</label>
+                            <input type="text" name="TieuDeBV" class="form-control mt-2"
+                                placeholder="Nhập tiêu đề bài viết" required>
+                        </div>
+
+                        <div class="form-group p-2">
+                            <label for="content">Nội dung bài viết:</label>
+                            <textarea name="NoiDung" class="content form-control mt-2" rows="10"
+                                placeholder="Nhập nội dung bài viết"></textarea>
+                        </div>
+
+                        <div class="form-group p-2">
+                            <button type="button" class="toggleCodeEditor btn btn-secondary">Hiển thị/Ẩn Mã
+                                Code</button>
+                        </div>
+
+                        <div class="codeEditorContainer" style="display:none;">
+                            <div class="form-group p-2">
+                                <label>Mã code:</label>
+                                <textarea name="CodeContent" class="codeContent form-control mt-2" rows="10"
+                                    placeholder="Nhập mã code"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end p-2">
+                            <button type="submit" class="btn btn-primary">Gửi Bài Viết</button>
+                        </div>
+            </div>
+        </form>
+
+        <%- include('../Shared/_EditorScripts') %>

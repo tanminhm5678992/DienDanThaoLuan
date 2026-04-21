@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !=='undefined' ? title : 'IT Xperience Forum' %>
+    </title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Highlight.js -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.0/styles/monokai-sublime.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Custom CSS -->
+    <link href="/style.css" rel="stylesheet" type="text/css">
+
+    <!-- Open Graph -->
+    <% if (typeof postTitle !=='undefined' ) { %>
+        <meta property="og:title" content="<%= postTitle %>" />
+        <% } %>
+            <% if (typeof postURL !=='undefined' ) { %>
+                <meta property="og:url" content="<%= postURL %>" />
+                <% } %>
+
+                    <style>
+                        /* ===== SNOWFLAKES ===== */
+                        .snowflakes {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            pointer-events: none;
+                            overflow: hidden;
+                            z-index: 0;
+                        }
+
+                        .snowflake {
+                            position: absolute;
+                            top: -50px;
+                            font-size: 1.2em;
+                            color: rgba(255, 255, 255, 0.18);
+                            animation: fall linear infinite;
+                            user-select: none;
+                        }
+
+                        @keyframes fall {
+                            0% {
+                                transform: translateY(0) rotate(0deg);
+                                opacity: .8;
+                            }
+
+                            100% {
+                                transform: translateY(105vh) rotate(360deg);
+                                opacity: 0;
+                            }
+                        }
+
+                        .snowflake:nth-child(1) {
+                            left: 5%;
+                            animation-duration: 8s;
+                            animation-delay: 0s;
+                        }
+
+                        .snowflake:nth-child(2) {
+                            left: 15%;
+                            animation-duration: 11s;
+                            animation-delay: 1s;
+                        }
+
+                        .snowflake:nth-child(3) {
+                            left: 25%;
+                            animation-duration: 7s;
+                            animation-delay: 2s;
+                        }
+
+                        .snowflake:nth-child(4) {
+                            left: 35%;
+                            animation-duration: 9s;
+                            animation-delay: .5s;
+                        }
+
+                        .snowflake:nth-child(5) {
+                            left: 50%;
+                            animation-duration: 12s;
+                            animation-delay: 3s;
+                        }
+
+                        .snowflake:nth-child(6) {
+                            left: 60%;
+                            animation-duration: 8s;
+                            animation-delay: 1.5s;
+                        }
+
+                        .snowflake:nth-child(7) {
+                            left: 70%;
+                            animation-duration: 10s;
+                            animation-delay: .8s;
+                        }
+
+                        .snowflake:nth-child(8) {
+                            left: 80%;
+                            animation-duration: 7s;
+                            animation-delay: 2.5s;
+                        }
+
+                        .snowflake:nth-child(9) {
+                            left: 90%;
+                            animation-duration: 9s;
+                            animation-delay: 4s;
+                        }
+
+                        .snowflake:nth-child(10) {
+                            left: 97%;
+                            animation-duration: 11s;
+                            animation-delay: 1.2s;
+                        }
+
+                        body {
+                            display: flex;
+                            flex-direction: column;
+                            min-height: 100vh;
+                        }
+
+                        .flex-grow-1 {
+                            flex: 1;
+                        }
+                    </style>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <div class="snowflakes" aria-hidden="true">
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❄</div>
+    </div>
+
+    <%- include('_PartialHeader') %>
+        <%- include('_PartialMenu') %>
+            <%- include('_PartialThongBao') %>
+
+                <% if (typeof breadcrumb !=='undefined' ) { %>
+                    <%- breadcrumb %>
+                        <% } %>
+
+                            <div class="container">
+                                <% if (typeof partialBanner !=='undefined' && partialBanner) { %>
+                                    <%- include('_PartialBanner') %>
+                                        <% } %>
+                            </div>
+
+                            <!-- TempData messages -->
+                            <% if (successMessage) { %>
+                                <div class="container mt-2">
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        <%= successMessage %>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                </div>
+                                <% } %>
+                                    <% if (errorMessage) { %>
+                                        <div class="container mt-2">
+                                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                <%= errorMessage %>
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="alert"></button>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <div class="container flex-grow-1 "
+                                                style="padding-left:25px; padding-right:0; position:relative; z-index:1;">
+                                                <%- body %>
+                                            </div>
+
+                                            <footer class="text-center py-3 text-white">
+                                                <%- include('_PartialFooter') %>
+                                            </footer>
+
+                                            <!-- Bootstrap JS -->
+                                            <script
+                                                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

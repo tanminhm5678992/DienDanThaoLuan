@@ -1,0 +1,71 @@
+<style>
+    pre {
+        background-color: #282a36;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    .hljs-keyword {
+        color: #ff79c6;
+    }
+
+    .hljs-string {
+        color: #50fa7b;
+    }
+
+    .hljs-variable {
+        color: #bd93f9;
+    }
+
+    .hljs-function {
+        color: #66d9ef;
+    }
+
+    .hljs-comment {
+        color: #6272a4;
+        font-style: italic;
+    }
+
+    code {
+        display: block;
+        white-space: pre;
+    }
+
+    .code-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container mt-4 mb-4">
+    <div class="card p-4">
+        <h5 class="mb-3"><strong>Chủ đề:</strong> <i>
+                <%= baiViet.TenCD %>
+            </i></h5>
+        <h5 class="mb-3"><strong>Tiêu đề bài viết:</strong> <i>
+                <%= baiViet.TieuDeBV %>
+            </i></h5>
+
+        <h5 class="mb-2"><strong>Nội dung:</strong></h5>
+        <div class="border p-3 rounded mb-4">
+            <p><%- noiDung %></p>
+        </div>
+
+        <% if (locals.code && code) { %>
+            <div class="code-container">
+                <pre><code class="language" id="codeBlock"><%- code %></code></pre>
+            </div>
+            <% } %>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        hljs.highlightAll();
+    });
+</script>

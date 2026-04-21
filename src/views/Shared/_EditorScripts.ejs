@@ -1,0 +1,96 @@
+<!-- TinyMCE -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.2/tinymce.min.js"></script>
+<!-- CodeMirror -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/theme/darcula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/javascript/javascript.min.js"></script>
+
+<style>
+    .CodeMirror {
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.88rem;
+        min-height: 120px;
+    }
+
+    .tox-tinymce {
+        border-radius: 8px !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+</style>
+
+<script>
+    (function () {
+        // Khởi tạo TinyMCE
+        tinymce.init({
+            selector: '.content',
+            plugins: 'image',
+            toolbar: 'undo redo | image | code',
+            skin: 'oxide-dark',
+            content_css: 'dark',
+            images_upload_url: '/dien-dan/upload',
+            automatic_uploads: true,
+            images_upload_handler: function (blobInfo, success, failure) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/dien-dan/upload');
+                xhr.onload = function () {
+                    if (xhr.status < 200 || xhr.status >= 300) { failure('HTTP Error: ' + xhr.status); return; }
+                    var json = JSON.parse(xhr.responseText);
+                    if (!json || typeof json.location !== 'string') { failure('Invalid JSON: ' + xhr.responseText); return; }
+                    success(json.location);
+                };
+                var formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+                xhr.send(formData);
+            }
+        });
+
+        // Toggle CodeMirror editor
+        document.querySelectorAll('.toggleCodeEditor').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var container = this.closest('form').querySelector('.codeEditorContainer');
+                // Ẩn các container khác
+                document.querySelectorAll('.codeEditorContainer').forEach(function (c) {
+                    if (c !== container) c.style.display = 'none';
+                });
+                if (container.style.display === 'none' || container.style.display === '') {
+                    container.style.display = 'block';
+                    var textArea = container.querySelector('.codeContent');
+                    if (!textArea.CodeMirrorInstance) {
+                        textArea.CodeMirrorInstance = CodeMirror.fromTextArea(textArea, {
+                            lineNumbers: true,
+                            theme: 'darcula',
+                            lineWrapping: true
+                        });
+                    }
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+        });
+
+        // Sync TinyMCE + CodeMirror khi submit
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('form').forEach(function (form) {
+                form.addEventListener('submit', function (e) {
+                    tinymce.triggerSave();
+                    var contentEl = form.querySelector('.content');
+                    var codeEl = form.querySelector('.codeContent');
+                    if (contentEl && tinymce.get(contentEl.id || contentEl.name)) {
+                        var noiDung = tinymce.get(contentEl.id || contentEl.name).getContent();
+                        if (!noiDung.trim()) {
+                            e.preventDefault();
+                            alert('Nội dung không được để trống.');
+                            return;
+                        }
+                        contentEl.value = noiDung;
+                    }
+                    if (codeEl && codeEl.CodeMirrorInstance) {
+                        codeEl.value = codeEl.CodeMirrorInstance.getValue();
+                    }
+                });
+            });
+        });
+    })();
+</script>

@@ -1,0 +1,21 @@
+<% /* * _PartialMotSoCD.ejs * Params: motSoChuDe - array of { MaCD, TenCD, TenLoai, MaLoai, SoBai } */ // Group by
+    TenLoai var grouped={}; if (locals.motSoChuDe) { motSoChuDe.forEach(function(cd) { if (!grouped[cd.TenLoai])
+    grouped[cd.TenLoai]=[]; grouped[cd.TenLoai].push(cd); }); } %>
+
+    <% Object.keys(grouped).forEach(function(tenLoai) { %>
+        <div class="sidebar-card">
+            <div class="sidebar-card-header">
+                <%= tenLoai %>
+            </div>
+            <% grouped[tenLoai].forEach(function(cd) { %>
+                <div class="sidebar-list-item">
+                    <a href="/bai-viet-theo-chu-de/<%= cd.MaCD %>?tenloai=<%= encodeURIComponent(cd.TenLoai) %>">
+                        💬 <%= cd.TenCD %>
+                    </a>
+                    <span class="badge-count">
+                        <%= cd.SoBai %> bài
+                    </span>
+                </div>
+                <% }); %>
+        </div>
+        <% }); %>

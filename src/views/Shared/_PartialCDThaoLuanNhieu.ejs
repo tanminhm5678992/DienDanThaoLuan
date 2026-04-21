@@ -1,0 +1,18 @@
+<% /* * _PartialCDThaoLuanNhieu.ejs * Params: chuDeThaoLuanNhieu - array of { MaCD, TenCD, TenLoai, SoBai } */ %>
+    <div class="sidebar-card">
+        <div class="sidebar-card-header">💬 Chủ đề thảo luận nhiều</div>
+        <% if (locals.chuDeThaoLuanNhieu && chuDeThaoLuanNhieu.length> 0) { %>
+            <% chuDeThaoLuanNhieu.forEach(function(cd) { %>
+                <div class="sidebar-list-item">
+                    <a href="/bai-viet-theo-chu-de/<%= cd.MaCD %>?tenloai=<%= encodeURIComponent(cd.TenLoai) %>">
+                        💬 <%= cd.TenCD %>
+                    </a>
+                    <span class="badge-count">
+                        <%= cd.SoBai %> bài
+                    </span>
+                </div>
+                <% }); %>
+                    <% } else { %>
+                        <div class="sidebar-list-item" style="color:rgba(255,255,255,0.3);">Chưa có dữ liệu</div>
+                        <% } %>
+    </div>

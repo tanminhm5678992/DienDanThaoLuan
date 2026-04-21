@@ -1,0 +1,130 @@
+<style>
+    #header {
+        background: linear-gradient(135deg, #0a0a0f 0%, #111118 100%);
+        border-bottom: 1px solid rgba(79, 142, 247, 0.15);
+        position: relative;
+        z-index: 100;
+    }
+
+    #header .logo {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1px solid rgba(79, 142, 247, 0.3);
+    }
+
+    #header .brand-name {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.5em;
+        text-decoration: none;
+        color: white;
+        background: linear-gradient(135deg, #4f8ef7, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    #header .btn-login {
+        background: linear-gradient(135deg, #4f8ef7, #a78bfa);
+        border: none;
+        color: white;
+        padding: 0.45rem 1.1rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: opacity 0.2s, transform 0.15s;
+        text-decoration: none;
+    }
+
+    #header .btn-login:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+        color: white;
+    }
+
+    #header .btn-register {
+        background: transparent;
+        border: 1px solid rgba(79, 142, 247, 0.5);
+        color: #4f8ef7;
+        padding: 0.45rem 1.1rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    #header .btn-register:hover {
+        background: rgba(79, 142, 247, 0.1);
+        border-color: #4f8ef7;
+        transform: translateY(-1px);
+    }
+
+    #header .dropdown-toggle {
+        background: rgba(79, 142, 247, 0.15);
+        border: 1px solid rgba(79, 142, 247, 0.3);
+        color: white;
+        border-radius: 8px;
+        padding: 0.45rem 1rem;
+        font-size: 0.88rem;
+    }
+
+    #header .dropdown-menu {
+        background: #111118;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    #header .dropdown-item {
+        color: #d0d0e0;
+        font-size: 0.88rem;
+        padding: 0.5rem 1rem;
+        transition: background 0.15s, color 0.15s;
+    }
+
+    #header .dropdown-item:hover {
+        background: rgba(79, 142, 247, 0.1);
+        color: #4f8ef7;
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+<div id="header">
+    <div class="container">
+        <header class="d-flex justify-content-between align-items-center py-3">
+            <div class="logo-section d-flex align-items-center gap-3">
+                <!-- <img src="/Images/logo.jpg" alt="Logo" class="logo"> -->
+                <a href="/" class="brand-name">IT Xperience</a>
+            </div>
+            <div class="user-buttons d-flex align-items-center gap-2">
+                <% if (locals.userId || locals.adminId) { %>
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            Xin chào, <%= locals.username || 'Người dùng' %>!
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user-info"><i
+                                        class="fas fa-id-card me-2 opacity-50"></i>Thông tin cá nhân</a></li>
+                            <li><a class="dropdown-item" href="/bai-viet-cua-toi"><i
+                                        class="fas fa-file-alt me-2 opacity-50"></i>Bài viết của tôi</a></li>
+                            <li>
+                                <hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.08)">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="/account/logout"><i
+                                        class="fas fa-sign-out-alt me-2 opacity-50"></i>Đăng xuất</a></li>
+                        </ul>
+                    </div>
+                    <% } else { %>
+                        <a href="/account/login" class="btn-login">Đăng nhập</a>
+                        <a href="/account/register" class="btn-register">Đăng ký</a>
+                        <% } %>
+            </div>
+        </header>
+    </div>
+</div>

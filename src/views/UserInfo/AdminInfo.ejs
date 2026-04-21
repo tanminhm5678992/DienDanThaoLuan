@@ -1,0 +1,278 @@
+<style>
+    .cover-container {
+        position: relative;
+        height: 350px;
+        background-color: #f0f2f5;
+        margin-bottom: 60px;
+        margin-left: 12px;
+        margin-right: 37px;
+    }
+
+    .cover-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .cover-upload-icon {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background-color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+    }
+
+    .cover-upload-icon:hover {
+        background-color: #f0f2f5;
+    }
+
+    .profile-section {
+        position: relative;
+        max-width: 1000px;
+        margin: -135px 20px 0px 30px;
+        padding: 0 20px;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: flex-end;
+        margin-bottom: 20px;
+    }
+
+    .profile-img-container {
+        position: relative;
+        margin-right: 20px;
+    }
+
+    .profile-img-large {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 6px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        object-fit: cover;
+    }
+
+    .profile-info {
+        margin: 30px 0px;
+    }
+
+    .profile-info h1 {
+        font-size: 35px;
+    }
+
+    .profile-name {
+        font-size: 32px;
+        font-weight: bold;
+        margin: 0;
+        color: #1c1e21;
+    }
+
+    .profile-role {
+        font-size: 15px;
+        color: #65676B;
+        margin-top: 5px;
+    }
+
+    .avatar-upload-icon {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background-color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<!-- Ảnh bìa -->
+<div class="cover-container">
+    <img src="/Images/<%= user.AnhBia || 'default-bg.jpg' %>" alt="Cover" class="cover-image"
+        style="border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+    <label for="cover" class="cover-upload-icon">
+        <i class="fas fa-camera"></i>
+        <span>Chỉnh sửa ảnh bìa</span>
+        <form action="/user-info/change-cover" method="POST" enctype="multipart/form-data" id="coverForm">
+            <input type="file" id="cover" name="cover" accept="image/*" class="d-none"
+                onchange="handleCoverChange(this);">
+        </form>
+    </label>
+</div>
+
+<!-- Thông tin profile -->
+<div class="profile-section">
+    <div class="profile-header">
+        <div class="profile-img-container">
+            <img src="/Images/<%= user.AnhDaiDien || 'avatar.jpg' %>" alt="Avatar" class="profile-img-large">
+            <label for="avatar" class="avatar-upload-icon">
+                <i class="fas fa-camera"></i>
+                <form action="/user-info/change-avatar" method="POST" enctype="multipart/form-data" id="avatarForm">
+                    <input type="file" id="avatar" name="avatar" accept="image/*" class="d-none"
+                        onchange="handleAvatarChange(this);">
+                </form>
+            </label>
+        </div>
+        <div class="profile-info">
+            <h1 class="profile-name">
+                <%= user.HoTen %>
+            </h1>
+            <div class="profile-role">Quản trị viên</div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Thông báo success/error từ session tempData -->
+    <% if (locals.successMessage) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <%= successMessage %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } %>
+            <% if (locals.errorMessage) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <%= errorMessage %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% } %>
+
+                    <div class="row">
+                        <!-- Thông tin Quản trị viên -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Thông tin Quản trị viên</h5>
+                                    <form action="/user-info/update-admin" method="POST" class="needs-validation"
+                                        novalidate>
+                                        <input type="hidden" name="MaQTV" value="<%= user.MaQTV %>">
+
+                                        <div class="mb-3">
+                                            <p>Họ và tên:</p>
+                                            <input type="text" name="HoTen" class="form-control"
+                                                value="<%= user.HoTen %>" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <p>Email:</p>
+                                            <input type="email" name="Email" class="form-control"
+                                                value="<%= user.Email %>" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <p>Giới tính:</p>
+                                            <select name="GioiTinh" class="form-select" required>
+                                                <option value="" disabled <%=!user.GioiTinh ? 'selected' : '' %>>Chọn
+                                                    giới tính</option>
+                                                <option value="Nam" <%=user.GioiTinh==='Nam' ? 'selected' : '' %>>Nam
+                                                </option>
+                                                <option value="Nữ" <%=user.GioiTinh==='Nữ' ? 'selected' : '' %>>Nữ
+                                                </option>
+                                                <option value="Khác" <%=user.GioiTinh==='Khác' ? 'selected' : '' %>>Khác
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <p>Số điện thoại:</p>
+                                            <input type="tel" name="SDT" class="form-control" value="<%= user.SDT %>"
+                                                required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <p>Ngày sinh:</p>
+                                            <input type="date" name="NgaySinh" class="form-control"
+                                                value="<%= user.NgaySinh ? new Date(user.NgaySinh).toISOString().split('T')[0] : '' %>"
+                                                required>
+                                            <div class="invalid-feedback">Vui lòng chọn ngày sinh.</div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Đổi mật khẩu -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Đổi mật khẩu</h5>
+                                    <form action="/user-info/change-password" method="POST" class="needs-validation"
+                                        novalidate>
+                                        <div class="mb-3">
+                                            <label class="form-label" style="margin-bottom: 1rem">Mật khẩu hiện
+                                                tại</label>
+                                            <input type="password" name="currentPassword" class="form-control" required>
+                                            <div class="invalid-feedback">Vui lòng nhập mật khẩu hiện tại.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" style="margin-bottom: 1rem">Mật khẩu mới</label>
+                                            <input type="password" name="newPassword" class="form-control" required>
+                                            <div class="invalid-feedback">Vui lòng nhập mật khẩu mới.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label" style="margin-bottom: 1rem">Xác nhận mật khẩu
+                                                mới</label>
+                                            <input type="password" name="confirmPassword" class="form-control" required>
+                                            <div class="invalid-feedback">Vui lòng xác nhận mật khẩu mới.</div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+    function handleAvatarChange(input) {
+        if (input.files && input.files[0]) {
+            if (input.files[0].size > 5 * 1024 * 1024) {
+                alert('File quá lớn. Vui lòng chọn file có kích thước nhỏ hơn 5MB.');
+                input.value = '';
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                document.querySelector('.profile-img-large').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+            document.getElementById('avatarForm').submit();
+        }
+    }
+
+    function handleCoverChange(input) {
+        if (input.files && input.files[0]) {
+            if (input.files[0].size > 5 * 1024 * 1024) {
+                alert('File quá lớn. Vui lòng chọn file có kích thước nhỏ hơn 5MB.');
+                input.value = '';
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                document.querySelector('.cover-image').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+            document.getElementById('coverForm').submit();
+        }
+    }
+
+    // Tự động ẩn alert sau 10 giây
+    setTimeout(function () {
+        document.querySelectorAll('.alert').forEach(function (alert) {
+            alert.classList.remove('show');
+            setTimeout(function () { alert.remove(); }, 500);
+        });
+    }, 10000);
+</script>

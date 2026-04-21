@@ -1,0 +1,35 @@
+{
+  "name": "be_diendantraodoi",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "TanMinh",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --exec babel-node src/server.js"
+  },
+  "dependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/node": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "axios": "^1.15.0",
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.2",
+    "dotenv": "^17.4.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.19.0",
+    "fast-xml-parser": "^5.5.11",
+    "fs-extra": "^11.3.4",
+    "multer": "^2.1.1",
+    "mysql2": "^3.20.0",
+    "nodemailer": "^8.0.5",
+    "nodemon": "^3.1.14",
+    "pidusage": "^4.0.1",
+    "sequelize": "^6.37.8",
+    "sequelize-cli": "^6.6.5"
+  }
+}

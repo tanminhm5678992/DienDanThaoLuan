@@ -1,0 +1,636 @@
+<h2 class="execution-title mt-3">Run Code</h2>
+
+<!-- Chọn ngôn ngữ lập trình -->
+<div class="language-container">
+    <label for="languageSelect" class="language-label">Chọn ngôn ngữ lập trình:</label>
+    <select id="languageSelect" class="form-control mt-2" name="language" onchange="toggleInput()">
+        <option value="python" <%=locals.SelectedLanguage==='python' ? 'selected' : '' %>>Python</option>
+        <option value="java" <%=locals.SelectedLanguage==='java' ? 'selected' : '' %>>Java</option>
+        <option value="php" <%=locals.SelectedLanguage==='php' ? 'selected' : '' %>>PHP</option>
+        <option value="c" <%=locals.SelectedLanguage==='c' ? 'selected' : '' %>>C</option>
+        <option value="cpp" <%=locals.SelectedLanguage==='cpp' ? 'selected' : '' %>>C++</option>
+        <option value="javascript" <%=locals.SelectedLanguage==='javascript' ? 'selected' : '' %>>JavaScript</option>
+        <option value="html" <%=locals.SelectedLanguage==='html' ? 'selected' : '' %>>HTML</option>
+    </select>
+</div>
+
+<!-- Phần chứa code -->
+<div class="code-container">
+    <h3 class="section-title">Code:</h3>
+    <div class="code-box">
+        <textarea name="CodeContent" id="Code"
+            class="form-control mt-2 codeContent"><%= locals.CodeContent || '' %></textarea>
+    </div>
+    <div class="run-bar">
+        <button class="run-button" onclick="runCode()" id="runBtn">
+            <i class="fas fa-play"></i> Run
+        </button>
+        <button class="add-tc-button" onclick="addTestCase()" id="addTcBtn">
+            <i class="fas fa-plus"></i> Thêm test case
+        </button>
+    </div>
+</div>
+
+<!-- Danh sách test cases -->
+<div class="tc-container" id="testCaseList">
+    <h3 class="section-title">Test Cases:</h3>
+    <div id="tcItems">
+        <!-- Test case mặc định -->
+        <div class="tc-item" data-index="0">
+            <div class="tc-header">
+                <span class="tc-label">Test case 1</span>
+                <button class="tc-remove-btn" onclick="removeTestCase(this)" title="Xóa">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="tc-body">
+                <div class="tc-col">
+                    <label>Input:</label>
+                    <textarea class="tc-input form-control" name="inputs[]" rows="3"
+                        placeholder="Nhập input..."></textarea>
+                </div>
+                <div class="tc-col">
+                    <label>Expected output:</label>
+                    <textarea class="tc-expected form-control" name="expecteds[]" rows="3"
+                        placeholder="(tuỳ chọn)"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kết quả -->
+<div class="result-container" id="resultContainer">
+    <h3 class="section-title">
+        Kết quả
+        <% if (locals.testcases && testcases.length> 0) { %>
+            <% const passed=testcases.filter(t=> t.status === 'accepted').length;
+                const total = testcases.length;
+                %>
+                <span class="result-summary <%= passed === total ? 'all-pass' : 'some-fail' %>">
+                    <%= passed %>/<%= total %> passed
+                </span>
+                <% } %>
+    </h3>
+
+    <% if (locals.testcases && testcases.length> 0) { %>
+        <% testcases.forEach(function(tc, i) { %>
+            <% const statusMap={ accepted: { label: 'Accepted' , cls: 'status-ac' }, wrong_answer: {
+                label: 'Wrong Answer' , cls: 'status-wa' }, runtime_error: { label: 'Runtime Error' , cls: 'status-re'
+                }, compilation_error: { label: 'Compilation Error' , cls: 'status-ce' }, time_limit_exceeded: {
+                label: 'Time Limit Exceeded' , cls: 'status-tle' }, pending: { label: 'Pending' , cls: 'status-pending'
+                }, }; const s=statusMap[tc.status] || { label: tc.status, cls: 'status-pending' }; %>
+                <div class="tc-result <%= s.cls %>">
+                    <div class="tc-result-header" onclick="toggleResult(this)">
+                        <span class="tc-result-name">Test case <%= i + 1 %></span>
+                        <span class="tc-result-badge <%= s.cls %>">
+                            <%= s.label %>
+                        </span>
+                        <% if (tc.executionTime) { %>
+                            <span class="tc-result-time">
+                                <%= tc.executionTime %>s
+                            </span>
+                            <% } %>
+                                <i class="fas fa-chevron-down tc-chevron"></i>
+                    </div>
+                    <div class="tc-result-body">
+                        <% if (tc.input) { %>
+                            <div class="result-block">
+                                <span class="result-block-label">Input</span>
+                                <pre><%= tc.input %></pre>
+                            </div>
+                            <% } %>
+                                <% if (tc.expected) { %>
+                                    <div class="result-block">
+                                        <span class="result-block-label">Expected</span>
+                                        <pre><%= tc.expected %></pre>
+                                    </div>
+                                    <% } %>
+                                        <div class="result-block">
+                                            <span class="result-block-label">Output</span>
+                                            <pre
+                                                class="<%= tc.status === 'accepted' ? 'out-ok' : 'out-err' %>"><%= tc.output || '(không có output)' %></pre>
+                                        </div>
+                                        <% if (tc.errorMessage) { %>
+                                            <div class="result-block">
+                                                <span class="result-block-label">Error</span>
+                                                <pre class="out-err"><%= tc.errorMessage %></pre>
+                                            </div>
+                                            <% } %>
+                    </div>
+                </div>
+                <% }) %>
+                    <% } else { %>
+                        <div class="no-result">Nhấn <strong>Run</strong> để xem kết quả.</div>
+                        <% } %>
+</div>
+
+<style>
+    .execution-title {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+
+    .language-container {
+        margin: 20px auto;
+        padding: 15px;
+        border-radius: 8px;
+        max-width: 82%;
+    }
+
+    .language-label {
+        font-size: 1.1rem;
+        color: #34495e;
+    }
+
+    .section-title {
+        color: #34495e;
+        font-size: 1.3rem;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .result-summary {
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 2px 10px;
+        border-radius: 20px;
+    }
+
+    .result-summary.all-pass {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .result-summary.some-fail {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .code-container,
+    .tc-container,
+    .result-container {
+        margin: 20px auto;
+        padding: 15px 20px;
+        background-color: #f4f4f4;
+        border-radius: 10px;
+        max-width: 82%;
+    }
+
+    .code-box {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .run-bar {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .run-button,
+    .add-tc-button {
+        border: none;
+        padding: 9px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: background 0.2s, transform 0.1s;
+    }
+
+    .run-button {
+        background-color: #0c88c2;
+        color: white;
+    }
+
+    .run-button:hover {
+        background-color: #0068a0;
+        transform: translateY(-1px);
+    }
+
+    .add-tc-button {
+        background-color: #27ae60;
+        color: white;
+    }
+
+    .add-tc-button:hover {
+        background-color: #1e8449;
+        transform: translateY(-1px);
+    }
+
+    /* Test case input list */
+    .tc-item {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .tc-header {
+        display: flex;
+        align-items: center;
+        padding: 8px 14px;
+        background: #e9ecef;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .tc-label {
+        font-weight: 600;
+        color: #495057;
+        flex: 1;
+    }
+
+    .tc-remove-btn {
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .tc-remove-btn:hover {
+        background: #f8d7da;
+    }
+
+    .tc-body {
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .tc-col {
+        flex: 1;
+    }
+
+    .tc-col label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .tc-input,
+    .tc-expected {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        resize: vertical;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border-color: #444;
+    }
+
+    .tc-input:focus,
+    .tc-expected:focus {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border-color: #0c88c2;
+        box-shadow: 0 0 0 0.2rem rgba(12, 136, 194, 0.25);
+    }
+
+    /* Kết quả từng test case */
+    .tc-result {
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #dee2e6;
+        overflow: hidden;
+    }
+
+    .tc-result-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        background: #fff;
+        transition: background 0.15s;
+    }
+
+    .tc-result-header:hover {
+        background: #f8f9fa;
+    }
+
+    .tc-result-name {
+        font-weight: 600;
+        color: #343a40;
+        flex: 1;
+    }
+
+    .tc-result-time {
+        font-size: 0.8rem;
+        color: #868e96;
+    }
+
+    .tc-chevron {
+        color: #868e96;
+        transition: transform 0.2s;
+    }
+
+    .tc-result-header.open .tc-chevron {
+        transform: rotate(180deg);
+    }
+
+    .tc-result-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-ac .tc-result-badge,
+    .tc-result-badge.status-ac {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-wa .tc-result-badge,
+    .tc-result-badge.status-wa {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-re .tc-result-badge,
+    .tc-result-badge.status-re {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-ce .tc-result-badge,
+    .tc-result-badge.status-ce {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-tle .tc-result-badge,
+    .tc-result-badge.status-tle {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .status-pending .tc-result-badge,
+    .tc-result-badge.status-pending {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
+    /* Border trái màu theo status */
+    .tc-result.status-ac {
+        border-left: 4px solid #28a745;
+    }
+
+    .tc-result.status-wa {
+        border-left: 4px solid #dc3545;
+    }
+
+    .tc-result.status-re {
+        border-left: 4px solid #ffc107;
+    }
+
+    .tc-result.status-ce {
+        border-left: 4px solid #dc3545;
+    }
+
+    .tc-result.status-tle {
+        border-left: 4px solid #007bff;
+    }
+
+    .tc-result-body {
+        display: none;
+        padding: 12px 14px;
+        border-top: 1px solid #dee2e6;
+        background: #fdfdfd;
+    }
+
+    .tc-result-body.open {
+        display: block;
+    }
+
+    .result-block {
+        margin-bottom: 10px;
+    }
+
+    .result-block-label {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 4px;
+    }
+
+    .result-block pre {
+        background: #2d2d2d;
+        color: #f1f1f1;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin: 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 0.88rem;
+    }
+
+    pre.out-ok {
+        border-left: 3px solid #28a745;
+    }
+
+    pre.out-err {
+        border-left: 3px solid #dc3545;
+        color: #ff7b7b;
+    }
+
+    .no-result {
+        text-align: center;
+        color: #868e96;
+        padding: 30px;
+        font-size: 1rem;
+    }
+
+    @media (max-width: 600px) {
+        .tc-body {
+            flex-direction: column;
+        }
+
+        .language-container,
+        .code-container,
+        .tc-container,
+        .result-container {
+            max-width: 100%;
+        }
+    }
+</style>
+
+<!-- CodeMirror theme monokai cho trang này -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/theme/monokai.min.css">
+<!-- CodeMirror modes cho các ngôn ngữ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/php/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/css/css.min.js"></script>
+
+<!-- Inject server data vào window, không dùng EJS bên trong script -->
+<script type="application/json"
+    id="__serverData__"><%- JSON.stringify((locals.testcases || []).map(function(tc){ return { input: tc.input || '', expected: tc.expected || '' }; })) %></script>
+
+<script>
+    var cmEditor = null;
+    window.__restoredTCs__ = JSON.parse(document.getElementById('__serverData__').textContent || '[]');
+
+    // Map ngôn ngữ -> CodeMirror mode
+    var cmModeMap = {
+        python: 'python',
+        java: 'text/x-java',
+        c: 'text/x-csrc',
+        cpp: 'text/x-c++src',
+        javascript: 'javascript',
+        php: 'php',
+        html: 'htmlmixed',
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var textArea = document.getElementById('Code');
+        var lang = document.getElementById('languageSelect').value;
+        cmEditor = CodeMirror.fromTextArea(textArea, {
+            lineNumbers: true,
+            theme: 'monokai',
+            lineWrapping: true,
+            mode: cmModeMap[lang] || 'text/plain',
+        });
+
+        // Phục hồi test cases từ kết quả trả về
+        var restoredTCs = window.__restoredTCs__ || [];
+        if (restoredTCs.length > 0) {
+            document.getElementById('tcItems').innerHTML = '';
+            restoredTCs.forEach(function (tc) {
+                addTestCaseWithData(tc.input, tc.expected);
+            });
+        }
+
+        toggleInput();
+    });
+
+    function toggleInput() {
+        var lang = document.getElementById('languageSelect').value;
+        var tcContainer = document.getElementById('testCaseList');
+        tcContainer.style.display = lang === 'html' ? 'none' : 'block';
+
+        // Đổi mode CodeMirror
+        if (cmEditor) {
+            cmEditor.setOption('mode', cmModeMap[lang] || 'text/plain');
+        }
+    }
+
+    var tcCount = 1;
+
+    function addTestCase() {
+        addTestCaseWithData('', '');
+    }
+
+    function addTestCaseWithData(inputVal, expectedVal) {
+        tcCount++;
+        var list = document.getElementById('tcItems');
+        var div = document.createElement('div');
+        div.className = 'tc-item';
+        div.setAttribute('data-index', tcCount);
+        div.innerHTML =
+            '<div class="tc-header">' +
+            '<span class="tc-label">Test case ' + (list.children.length + 1) + '</span>' +
+            '<button class="tc-remove-btn" onclick="removeTestCase(this)" title="Xóa"><i class="fas fa-times"></i></button>' +
+            '</div>' +
+            '<div class="tc-body">' +
+            '<div class="tc-col">' +
+            '<label>Input:</label>' +
+            '<textarea class="tc-input form-control" name="inputs[]" rows="3" placeholder="Nhập input...">' + inputVal + '</textarea>' +
+            '</div>' +
+            '<div class="tc-col">' +
+            '<label>Expected output:</label>' +
+            '<textarea class="tc-expected form-control" name="expecteds[]" rows="3" placeholder="(tuỳ chọn)">' + expectedVal + '</textarea>' +
+            '</div>' +
+            '</div>';
+        list.appendChild(div);
+        renumberTCs();
+    }
+
+    function removeTestCase(btn) {
+        var item = btn.closest('.tc-item');
+        var list = document.getElementById('tcItems');
+        if (list.children.length <= 1) return; // giữ ít nhất 1
+        item.remove();
+        renumberTCs();
+    }
+
+    function renumberTCs() {
+        var items = document.querySelectorAll('#tcItems .tc-item');
+        items.forEach(function (item, i) {
+            item.querySelector('.tc-label').textContent = 'Test case ' + (i + 1);
+        });
+    }
+
+    function runCode() {
+        var language = document.getElementById('languageSelect').value;
+        var sourceCode = cmEditor ? cmEditor.getValue() : document.getElementById('Code').value;
+
+        var form = document.createElement('form');
+        form.method = 'POST';
+
+        if (language === 'html') {
+            form.action = '/code/execute-html';
+            appendHidden(form, 'sourceCode', sourceCode);
+            appendHidden(form, 'language', language);
+        } else {
+            form.action = '/code/execute';
+            appendHidden(form, 'language', language);
+            appendHidden(form, 'sourceCode', sourceCode);
+
+            // Gom tất cả inputs[] và expecteds[]
+            var inputs = document.querySelectorAll('#tcItems .tc-input');
+            var expecteds = document.querySelectorAll('#tcItems .tc-expected');
+            inputs.forEach(function (el) {
+                appendHidden(form, 'inputs[]', el.value);
+            });
+            expecteds.forEach(function (el) {
+                appendHidden(form, 'expecteds[]', el.value);
+            });
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function appendHidden(form, name, value) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = name;
+        inp.value = value;
+        form.appendChild(inp);
+    }
+
+    // Toggle mở/đóng kết quả từng test case
+    function toggleResult(header) {
+        header.classList.toggle('open');
+        var body = header.nextElementSibling;
+        body.classList.toggle('open');
+    }
+
+    // Tự động mở kết quả fail
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.tc-result:not(.status-ac) .tc-result-header').forEach(function (h) {
+            h.classList.add('open');
+            h.nextElementSibling.classList.add('open');
+        });
+    });
+</script>
+
+<%- include('../Shared/_EditorScripts') %>

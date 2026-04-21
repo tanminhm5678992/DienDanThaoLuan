@@ -1,0 +1,152 @@
+<style>
+    .cover-container {
+        position: relative;
+        height: 350px;
+        background-color: #f0f2f5;
+        margin-bottom: 60px;
+        margin-left: 12px;
+        margin-right: 37px;
+    }
+
+    .cover-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-section {
+        position: relative;
+        max-width: 1000px;
+        margin: -135px 20px 0px 30px;
+        padding: 0 20px;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: flex-end;
+        margin-bottom: 20px;
+    }
+
+    .profile-img-container {
+        position: relative;
+        margin-right: 20px;
+    }
+
+    .profile-img-large {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 6px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        object-fit: cover;
+    }
+
+    .profile-info {
+        margin: 30px 0px;
+    }
+
+    .profile-info h1 {
+        font-size: 35px;
+    }
+
+    .profile-name {
+        font-size: 32px;
+        font-weight: bold;
+        margin: 0;
+        color: #1c1e21;
+    }
+
+    .profile-role {
+        font-size: 15px;
+        color: #65676B;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="cover-container">
+    <img src="/Images/<%= thongTin.AnhBia || 'default-bg.jpg' %>" alt="Cover" class="cover-image"
+        style="border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+</div>
+
+<div class="profile-section">
+    <div class="profile-header">
+        <div class="profile-img-container">
+            <img src="/Images/<%= thongTin.AnhDaiDien || 'avatar.jpg' %>" alt="Avatar" class="profile-img-large">
+        </div>
+        <div class="profile-info">
+            <h1 class="profile-name">
+                <%= thongTin.HoTen %>
+                    <% if (thongTin.GioiTinh==='Nam' ) { %>
+                        <i class="bi bi-gender-male text-primary"></i>
+                        <% } else if (thongTin.GioiTinh==='Nữ' ) { %>
+                            <i class="bi bi-gender-female text-danger"></i>
+                            <% } else { %>
+                                <i class="bi bi-question-circle-fill text-secondary"></i>
+                                <% } %>
+            </h1>
+            <div class="profile-role">
+                <%= isAd ? 'Quản Trị Viên' : 'Thành Viên' %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row my-5">
+    <div class="col-md-12">
+        <div class="flex-grow-1 me-3 bg-white p-2 rounded">
+            <div class="d-flex justify-content-end mb-2">
+                <h2 style="font-weight: bold; margin-right: auto; margin-left: 5px; color: gray">BÀI VIẾT ĐÃ ĐĂNG</h2>
+            </div>
+
+            <% if (!baiViets || baiViets.length===0) { %>
+                <div class="alert alert-warning">Chưa có bài viết nào</div>
+                <% } %>
+
+                    <% if (baiViets && baiViets.length> 0) { %>
+                        <% baiViets.forEach(function(t) { %>
+                            <div class="mb-1 rounded-0 border-top pt-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <img src="/Images/<%= t.AnhDaiDien || 'avatar.jpg' %>" alt="User Avatar"
+                                                class="img-fluid rounded-circle" width="50">
+                                            <div class="ms-3">
+                                                <h5 class="card-title mb-1">
+                                                    <a href="/bai-viet/<%= t.MaBV %>"
+                                                        class="text-decoration-none text-dark">
+                                                        <%= t.TieuDe %>
+                                                    </a>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <p class="mb-1">Ngày đăng: <span class="text-muted">
+                                                    <%= t.NgayDang %>
+                                                </span></p>
+                                            <p class="mb-0">Trả lời: <span class="text-muted">
+                                                    <%= t.SoBL %>
+                                                </span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                                <% } %>
+        </div>
+
+        <!-- Phân trang -->
+        <% if (locals.totalPages && totalPages> 1) { %>
+            <nav class="MenuTrang mt-3">
+                <ul class="pagination justify-content-center">
+                    <% for (let i=1; i <=totalPages; i++) { %>
+                        <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                            <a class="page-link" href="/thong-tin/<%= userId %>?page=<%= i %>">
+                                <%= i %>
+                            </a>
+                        </li>
+                        <% } %>
+                </ul>
+            </nav>
+            <% } %>
+    </div>
+</div>
