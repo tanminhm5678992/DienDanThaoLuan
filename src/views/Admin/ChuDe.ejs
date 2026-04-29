@@ -13,126 +13,167 @@
 
                 <h2 style="text-align:center;" class="p-2">Danh Sách Chủ Đề</h2>
 
-                <div class="mb-3">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemCD">
-                        + Thêm Chủ Đề
-                    </button>
+                <!-- Form thêm mới -->
+                <div class="card p-3 mb-3 shadow-sm">
+                    <h6 class="fw-bold mb-2">Thêm chủ đề mới</h6>
+                    <form action="/admin/quan-ly/chu-de/them" method="POST" class="row g-2 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label mb-1">Loại chủ đề</label>
+                            <select name="MaLoai" class="form-select" required>
+                                <option value="">-- Chọn loại --</option>
+                                <% if (loaiCDs) { loaiCDs.forEach(function(l) { %>
+                                    <option value="<%= l.MaLoai %>">
+                                        <%= l.TenLoai %>
+                                    </option>
+                                    <% }); } %>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label mb-1">Tên chủ đề</label>
+                            <input type="text" name="TenCD" class="form-control" placeholder="Nhập tên chủ đề..."
+                                required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">+ Thêm</button>
+                        </div>
+                    </form>
                 </div>
 
+                <!-- Bảng danh sách -->
                 <div style="background-color:white; border-radius:5px;">
                     <table class="table table-bordered mb-0" style="border: 2px solid #333;">
                         <thead style="background-color:#0078d4; color:white;">
                             <tr>
                                 <th style="width:220px; text-align:center;">Tên Loại Chủ Đề</th>
                                 <th>Tên Chủ Đề</th>
-                                <th style="width:180px; text-align:center;">Chỉnh Sửa</th>
+                                <th style="width:200px; text-align:center;">Chỉnh Sửa</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% if (loaiCDs && loaiCDs.length> 0) { %>
                                 <% loaiCDs.forEach(function(loai) { %>
-                                    <% const chuDeList=chuDes.filter(cd=> cd.MaLoai == loai.MaLoai);
-                                        const count = chuDeList.length;
-                                        %>
-                                        <% if (count===0) { %>
-                                            <tr class="bg-light">
-                                                <td style="text-align:center;"><strong>
-                                                        <%= loai.TenLoai %>
-                                                    </strong></td>
-                                                <td colspan="2" class="text-center text-muted">Không có chủ đề</td>
-                                            </tr>
-                                            <% } else { %>
-                                                <% chuDeList.forEach(function(cd, idx) { %>
-                                                    <tr class="bg-light">
-                                                        <% if (idx===0) { %>
-                                                            <td rowspan="<%= count %>"
-                                                                style="vertical-align:middle; text-align:center;">
-                                                                <strong>
-                                                                    <%= loai.TenLoai %>
-                                                                </strong>
-                                                            </td>
+                                    <% var chuDeList=chuDes.filter(function(cd){ return cd.MaLoai==loai.MaLoai; }); %>
+                                        <% var count=chuDeList.length; %>
+                                            <% if (count===0) { %>
+                                                <tr class="bg-light">
+                                                    <td style="text-align:center;"><strong>
+                                                            <%= loai.TenLoai %>
+                                                        </strong></td>
+                                                    <td colspan="2" class="text-center text-muted fst-italic">Chưa có
+                                                        chủ đề</td>
+                                                </tr>
+                                                <% } else { %>
+                                                    <% chuDeList.forEach(function(cd, idx) { %>
+                                                        <tr class="bg-light" id="row-<%= cd.MaCD %>">
+                                                            <% if (idx===0) { %>
+                                                                <td rowspan="<%= count %>"
+                                                                    style="vertical-align:middle; text-align:center;">
+                                                                    <strong>
+                                                                        <%= loai.TenLoai %>
+                                                                    </strong>
+                                                                </td>
+                                                                <% } %>
+
+                                                                    <%# Ô tên: chế độ xem vs chế độ sửa %>
+                                                                        <td style="vertical-align:middle;">
+                                                                            <%# Chế độ xem - mặc định hiện %>
+                                                                                <span id="label-<%= cd.MaCD %>">
+                                                                                    <%= cd.TenCD %>
+                                                                                </span>
+
+                                                                                <%# Chế độ sửa - ẩn mặc định %>
+                                                                                    <form id="form-<%= cd.MaCD %>"
+                                                                                        action="/admin/quan-ly/chu-de/sua/<%= cd.MaCD %>"
+                                                                                        method="POST"
+                                                                                        style="display:none;">
+                                                                                        <input type="text" name="TenCD"
+                                                                                            id="input-<%= cd.MaCD %>"
+                                                                                            class="form-control form-control-sm"
+                                                                                            value="<%= cd.TenCD %>"
+                                                                                            required>
+                                                                                    </form>
+                                                                        </td>
+
+                                                                        <%# Ô nút: chế độ xem vs chế độ sửa %>
+                                                                            <td
+                                                                                style="text-align:center; vertical-align:middle;">
+                                                                                <%# Nút Sửa + Xóa: hiện mặc định %>
+                                                                                    <div id="btns-view-<%= cd.MaCD %>">
+                                                                                        <button
+                                                                                            class="btn btn-warning btn-sm"
+                                                                                            onclick="batDauSua('<%= cd.MaCD %>')">Sửa</button>
+                                                                                        <form
+                                                                                            action="/admin/quan-ly/chu-de/xoa/<%= cd.MaCD %>"
+                                                                                            method="POST"
+                                                                                            style="display:inline"
+                                                                                            onsubmit="return confirm('Xóa chủ đề này?')">
+                                                                                            <button type="submit"
+                                                                                                class="btn btn-danger btn-sm">Xóa</button>
+                                                                                        </form>
+                                                                                    </div>
+
+                                                                                    <%# Nút Lưu + Hủy: ẩn mặc định %>
+                                                                                        <div id="btns-edit-<%= cd.MaCD %>"
+                                                                                            style="display:none;">
+                                                                                            <button type="button"
+                                                                                                class="btn btn-success btn-sm"
+                                                                                                onclick="luuSua('<%= cd.MaCD %>')">Lưu</button>
+                                                                                            <button type="button"
+                                                                                                class="btn btn-secondary btn-sm"
+                                                                                                onclick="huyySua('<%= cd.MaCD %>')">Hủy</button>
+                                                                                        </div>
+                                                                            </td>
+                                                        </tr>
+                                                        <% }); %>
                                                             <% } %>
-                                                                <td>
-                                                                    <%= cd.TenCD %>
-                                                                </td>
-                                                                <td style="text-align:center;">
-                                                                    <button class="btn btn-warning btn-sm"
-                                                                        onclick="editCD('<%= cd.MaCD %>', '<%= cd.TenCD %>', '<%= loai.MaLoai %>')">Sửa</button>
-                                                                    <form
-                                                                        action="/admin/quan-ly/chu-de/xoa/<%= cd.MaCD %>"
-                                                                        method="POST" style="display:inline"
-                                                                        onsubmit="return confirm('Xóa chủ đề này?')">
-                                                                        <button type="submit"
-                                                                            class="btn btn-danger btn-sm">Xóa</button>
-                                                                    </form>
-                                                                </td>
-                                                    </tr>
-                                                    <% }); %>
-                                                        <% } %>
-                                                            <% }); %>
-                                                                <% } else { %>
-                                                                    <tr>
-                                                                        <td colspan="3" class="text-center text-muted">
-                                                                            Chưa có dữ liệu.</td>
-                                                                    </tr>
-                                                                    <% } %>
+                                                                <% }); %>
+                                                                    <% } else { %>
+                                                                        <tr>
+                                                                            <td colspan="3"
+                                                                                class="text-center text-muted">Chưa có
+                                                                                dữ liệu.</td>
+                                                                        </tr>
+                                                                        <% } %>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Modal Thêm / Sửa Chủ Đề -->
-                <div class="modal fade" id="modalThemCD" tabindex="-1">
-                    <div class="modal-dialog" style="max-width:500px;">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="modalCDTitle">Thêm Chủ Đề Mới</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <form id="formCD" action="/admin/quan-ly/chu-de/them" method="POST">
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Loại chủ đề:</label>
-                                        <select name="MaLoai" id="selectMaLoai" class="form-select" required>
-                                            <option value="">-- Chọn loại --</option>
-                                            <% if (loaiCDs) { loaiCDs.forEach(function(l) { %>
-                                                <option value="<%= l.MaLoai %>">
-                                                    <%= l.TenLoai %>
-                                                </option>
-                                                <% }); } %>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Tên chủ đề:</label>
-                                        <input type="text" name="TenCD" id="inputTenCD" class="form-control"
-                                            placeholder="Nhập tên chủ đề..." required>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Đóng</button>
-                                    <button type="submit" class="btn btn-primary" id="btnSubmitCD">Thêm</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
                 <script>
-                    function editCD(maCD, tenCD, maLoai) {
-                        document.getElementById('modalCDTitle').textContent = 'Sửa Chủ Đề';
-                        document.getElementById('inputTenCD').value = tenCD;
-                        document.getElementById('selectMaLoai').value = maLoai;
-                        document.getElementById('btnSubmitCD').textContent = 'Lưu';
-                        document.getElementById('formCD').action = '/admin/quan-ly/chu-de/sua/' + maCD;
-                        new bootstrap.Modal(document.getElementById('modalThemCD')).show();
+                    // Mở chế độ sửa cho 1 dòng
+                    function batDauSua(maCD) {
+                        // Đóng tất cả dòng đang mở trước
+                        document.querySelectorAll('[id^="btns-edit-"]').forEach(function (el) {
+                            if (el.style.display !== 'none') {
+                                var id = el.id.replace('btns-edit-', '');
+                                _dongSua(id);
+                            }
+                        });
+
+                        // Mở dòng này
+                        document.getElementById('label-' + maCD).style.display = 'none';
+                        document.getElementById('form-' + maCD).style.display = 'block';
+                        document.getElementById('btns-view-' + maCD).style.display = 'none';
+                        document.getElementById('btns-edit-' + maCD).style.display = 'block';
+                        document.getElementById('input-' + maCD).focus();
                     }
 
-                    document.getElementById('modalThemCD').addEventListener('show.bs.modal', function (e) {
-                        if (!e.relatedTarget) return;
-                        document.getElementById('modalCDTitle').textContent = 'Thêm Chủ Đề Mới';
-                        document.getElementById('inputTenCD').value = '';
-                        document.getElementById('selectMaLoai').value = '';
-                        document.getElementById('btnSubmitCD').textContent = 'Thêm';
-                        document.getElementById('formCD').action = '/admin/quan-ly/chu-de/them';
-                    });
+                    // Submit form sửa
+                    function luuSua(maCD) {
+                        document.getElementById('form-' + maCD).submit();
+                    }
+
+                    // Hủy sửa, khôi phục về trạng thái xem
+                    function huyySua(maCD) {
+                        // Khôi phục giá trị input về tên đang hiển thị
+                        var label = document.getElementById('label-' + maCD);
+                        document.getElementById('input-' + maCD).value = label.textContent.trim();
+                        _dongSua(maCD);
+                    }
+
+                    function _dongSua(maCD) {
+                        document.getElementById('label-' + maCD).style.display = 'inline';
+                        document.getElementById('form-' + maCD).style.display = 'none';
+                        document.getElementById('btns-view-' + maCD).style.display = 'block';
+                        document.getElementById('btns-edit-' + maCD).style.display = 'none';
+                    }
                 </script>

@@ -1,45 +1,65 @@
 import { XMLParser } from 'fast-xml-parser';
 
 /**
- * Đóng gói nội dung bài viết thành XML
- * @param {string} noiDung    - Nội dung văn bản
- * @param {string} codeContent - Nội dung code (tuỳ chọn)
- * @returns {string} XML string
+ * Đóng gói nội dung thành XML.
+ * noiDung được wrap trong CDATA để tránh lỗi khi chứa HTML (<p>, <strong>, &, v.v.)
  */
 export function buildXmlContent(noiDung, codeContent) {
+    const safeND = noiDung || '';
     if (codeContent && codeContent.trim()) {
-        return `<NoiDung>${noiDung}<Code><![CDATA[${codeContent}]]></Code></NoiDung>`;
+        return `<NoiDung><![CDATA[${safeND}]]><Code><![CDATA[${codeContent}]]></Code></NoiDung>`;
     }
-    return `<NoiDung>${noiDung}</NoiDung>`;
+    return `<NoiDung><![CDATA[${safeND}]]></NoiDung>`;
 }
 
 /**
- * Phân tích XML nội dung bài viết
- * @param {string} xmlString
- * @returns {{ noiDungVanBan: string, codeContent: string }}
+ * Phân tích XML nội dung bài viết / bình luận.
+ * Xử lý 3 trường hợp:
+ *   1. XML hợp lệ có CDATA (format mới)
+ *   2. XML hợp lệ không có CDATA (format cũ trong DB)
+ *   3. XML bị hỏng hoặc không phải XML → trả về nguyên chuỗi
  */
 export function parseXmlContent(xmlString) {
     if (!xmlString) return { noiDungVanBan: '', codeContent: '' };
 
-    try {
-        const parser = new XMLParser({ ignoreAttributes: false, cdataPropName: '__cdata' });
-        const jsonObj = parser.parse(xmlString);
+    // Nếu không có thẻ XML thì trả về nguyên chuỗi (plain text cũ)
+    if (!xmlString.trim().startsWith('<')) {
+        return { noiDungVanBan: xmlString, codeContent: '' };
+    }
 
+    try {
+        const parser = new XMLParser({
+            ignoreAttributes: false,
+            cdataPropName: '__cdata',
+            // Cho phép nhiều CDATA node trong cùng 1 element
+            isArray: () => false,
+        });
+        const jsonObj = parser.parse(xmlString);
         const root = jsonObj?.NoiDung;
 
-        // Trường hợp NoiDung là object (có chứa Code)
+        // root là object → có chứa Code (có thể kèm __cdata cho noiDung)
         if (typeof root === 'object' && root !== null) {
-            const codeContent = root.Code?.__cdata || root.Code || '';
-            // Lấy phần text thuần — loại bỏ key Code
-            const { Code, ...rest } = root;
-            const noiDungVanBan = rest['#text'] || rest.__cdata || '';
-            return { noiDungVanBan: String(noiDungVanBan), codeContent: String(codeContent) };
+            const codeContent = root.Code?.__cdata ?? root.Code ?? '';
+            // noiDung nằm trong __cdata hoặc #text
+            const noiDungVanBan = root.__cdata ?? root['#text'] ?? '';
+            return {
+                noiDungVanBan: String(noiDungVanBan),
+                codeContent: String(codeContent),
+            };
         }
 
-        // Trường hợp NoiDung là string thuần (không có Code)
-        return { noiDungVanBan: String(root || ''), codeContent: '' };
+        // root là string thuần (NoiDung chỉ có text, không có Code)
+        return { noiDungVanBan: String(root ?? ''), codeContent: '' };
+
     } catch (err) {
-        console.error('parseXmlContent error:', err);
+        console.error('parseXmlContent error:', err.message);
+        // Fallback: cố strip thẻ XML bằng regex để lấy nội dung bên trong
+        const match = xmlString.match(/<NoiDung[^>]*>([\s\S]*?)<\/NoiDung>/i);
+        if (match) {
+            // Xóa thẻ <Code>...</Code> nếu có
+            const inner = match[1].replace(/<Code[\s\S]*?<\/Code>/gi, '').trim();
+            return { noiDungVanBan: inner, codeContent: '' };
+        }
         return { noiDungVanBan: xmlString, codeContent: '' };
     }
 }

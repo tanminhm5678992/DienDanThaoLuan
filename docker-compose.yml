@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+
+  ollama-init:
+    image: curlimages/curl:latest
+    container_name: ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+    command:
+      - sh
+      - -c
+      - |
+        echo '>>> Dang pull model qwen2.5-coder:1.5b (~1GB lan dau)...'
+        curl -s -X POST http://ollama:11434/api/pull -H 'Content-Type: application/json' -d '{"name":"qwen2.5-coder:1.5b","stream":false}'
+        echo '>>> Model san sang!'
+
+volumes:
+  ollama_data:

@@ -1,4 +1,6 @@
-<% var children=binhLuans.filter(function(x) { return String(x.IDCha)===String(parentId); }); %>
+<% /* * _RenderReplies.ejs * Params (passed via locals): * binhLuans - full array of BinhLuan objects * parentId -
+    current parent MaBL (null for root) * maBV - MaBV of the post * replyToName - tên người được reply */ var
+    children=binhLuans.filter(function(x) { return String(x.IDCha)===String(parentId); }); %>
 
     <% children.forEach(function(reply) { %>
         <div class="post-container <%= reply.IsAdmin ? 'admin-comment' : '' %>" id="bl-<%= reply.MaBL %>">
@@ -58,7 +60,8 @@
                                                 <div class="reply-box">
                                                     <textarea class="reply-content-text form-control mb-2"
                                                         name="NoiDung" placeholder="Nhập câu trả lời..."
-                                                        style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#f0f0f5;border-radius:10px;min-height:70px;"></textarea>
+                                                        style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#f0f0f5;border-radius:10px;min-height:70px;">
+                        </textarea>
                                                     <div class="d-flex align-items-center gap-2 flex-wrap">
                                                         <button type="button" class="btn-toggle-code toggleCodeEditor">
                                                             <i class="fas fa-code me-1"></i>Hiển thị/Ẩn Mã Code
@@ -78,8 +81,7 @@
             </div>
         </div>
 
-        <% var nestedLocals={ binhLuans: binhLuans, parentId: reply.MaBL, maBV: maBV, replyToName: reply.TenNguoiViet,
-            userId: locals.userId, adminId: locals.adminId }; %>
+        <% // Đệ quy: render replies của reply này var nestedLocals=Object.assign({}, locals, { parentId: reply.MaBL,
+            replyToName: reply.TenNguoiViet }); %>
             <%- include('_RenderReplies', nestedLocals) %>
-
                 <% }); %>

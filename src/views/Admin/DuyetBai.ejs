@@ -35,60 +35,69 @@
                                     <div class="d-flex gap-2 flex-wrap justify-content-end">
                                         <a href="/admin/chi-tiet-bai/<%= bv.MaBV %>"
                                             class="btn btn-primary btn-sm rounded-pill">Chi tiết</a>
-                                        <form action="/admin/duyet-bai/<%= bv.MaBV %>" method="POST"
-                                            style="display:inline">
-                                            <button type="submit" class="btn btn-success btn-sm rounded-pill">✓
-                                                Duyệt</button>
-                                        </form>
-                                        <button type="button" class="btn btn-danger btn-sm rounded-pill"
-                                            onclick="showTuChoi('<%= bv.MaBV %>')">✗ Từ chối</button>
+
+                                        <%# Duyệt: POST form thông thường — không cần modal %>
+                                            <form action="/admin/duyet-bai/<%= bv.MaBV %>" method="POST"
+                                                style="display:inline">
+                                                <button type="submit" class="btn btn-success btn-sm rounded-pill">✓
+                                                    Duyệt</button>
+                                            </form>
+
+                                            <%# Từ chối: mở inline form ngay trong card, tránh vấn đề modal %>
+                                                <button type="button" class="btn btn-danger btn-sm rounded-pill"
+                                                    onclick="toggleTuChoi('<%= bv.MaBV %>', this)">✗ Từ chối</button>
                                     </div>
                                 </div>
-                                <% }); %>
-                                    <% } %>
 
-                                        <!-- Phân trang -->
-                                        <% if (totalPages> 1) { %>
-                                            <nav class="mt-3">
-                                                <ul class="pagination justify-content-center">
-                                                    <% for(let i=1; i <=totalPages; i++) { %>
-                                                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                                                            <a class="page-link" href="?page=<%= i %>">
-                                                                <%= i %>
-                                                            </a>
-                                                        </li>
-                                                        <% } %>
-                                                </ul>
-                                            </nav>
-                                            <% } %>
-                </div>
+                                <%# Form từ chối inline — ẩn mặc định, hiện khi bấm nút %>
+                                    <div id="form-tuchoi-<%= bv.MaBV %>" class="list-group-item bg-light"
+                                        style="display:none;">
+                                        <form action="/admin/tu-choi-bai/<%= bv.MaBV %>" method="POST">
+                                            <label class="form-label fw-bold mb-1">Lý do từ chối:</label>
+                                            <textarea name="lydo" class="form-control mb-2" rows="2"
+                                                placeholder="Nhập lý do từ chối..." required></textarea>
+                                            <div class="d-flex gap-2">
+                                                <button type="submit" class="btn btn-danger btn-sm">Xác nhận từ
+                                                    chối</button>
+                                                <button type="button" class="btn btn-secondary btn-sm"
+                                                    onclick="toggleTuChoi('<%= bv.MaBV %>', null)">Hủy</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <% }); %>
+                                        <% } %>
 
-                <!-- Modal Từ chối -->
-                <div class="modal fade" id="modalTuChoi" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Từ chối bài viết</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <form id="formTuChoi" action="" method="POST">
-                                <div class="modal-body">
-                                    <label class="form-label fw-bold">Lý do từ chối:</label>
-                                    <textarea name="lydo" class="form-control" rows="3"
-                                        placeholder="Nhập lý do từ chối..." required></textarea>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                    <button type="submit" class="btn btn-danger">Xác nhận từ chối</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                                            <!-- Phân trang -->
+                                            <% if (totalPages> 1) { %>
+                                                <nav class="mt-3">
+                                                    <ul class="pagination justify-content-center">
+                                                        <% for(let i=1; i <=totalPages; i++) { %>
+                                                            <li
+                                                                class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                                                <a class="page-link" href="?page=<%= i %>">
+                                                                    <%= i %>
+                                                                </a>
+                                                            </li>
+                                                            <% } %>
+                                                    </ul>
+                                                </nav>
+                                                <% } %>
                 </div>
 
                 <script>
-                    function showTuChoi(maBV) {
-                        document.getElementById('formTuChoi').action = '/admin/tu-choi-bai/' + maBV;
-                        new bootstrap.Modal(document.getElementById('modalTuChoi')).show();
+                    function toggleTuChoi(maBV, btnEl) {
+                        const formDiv = document.getElementById('form-tuchoi-' + maBV);
+                        const isHidden = formDiv.style.display === 'none';
+
+                        // Đóng tất cả form từ chối khác trước
+                        document.querySelectorAll('[id^="form-tuchoi-"]').forEach(el => {
+                            el.style.display = 'none';
+                        });
+
+                        if (isHidden) {
+                            formDiv.style.display = 'block';
+                            // Focus vào textarea
+                            formDiv.querySelector('textarea').focus();
+                        }
                     }
                 </script>

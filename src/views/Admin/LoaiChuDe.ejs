@@ -13,19 +13,28 @@
 
                 <h2 style="text-align:center" class="p-2">QUẢN LÝ LOẠI CHỦ ĐỀ</h2>
 
-                <div class="mb-3">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemLoai">
-                        + Tạo mới
-                    </button>
+                <!-- Form thêm mới -->
+                <div class="card p-3 mb-3 shadow-sm">
+                    <h6 class="fw-bold mb-2">Thêm loại chủ đề mới</h6>
+                    <form action="/admin/quan-ly/loai-chu-de/them" method="POST" class="row g-2 align-items-end">
+                        <div class="col-md-8">
+                            <input type="text" name="TenLoai" class="form-control" placeholder="Nhập tên loại chủ đề..."
+                                required>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">+ Tạo mới</button>
+                        </div>
+                    </form>
                 </div>
 
+                <!-- Bảng danh sách -->
                 <div style="background-color:white; border-radius:15px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1);">
                     <table class="table table-striped table-bordered mb-0">
                         <thead>
                             <tr>
                                 <th style="text-align:center; width:80px;">STT</th>
                                 <th>Tên loại chủ đề</th>
-                                <th style="text-align:center; width:150px;">Tùy chỉnh</th>
+                                <th style="text-align:center; width:180px;">Tùy chỉnh</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -35,18 +44,49 @@
                                         <td style="text-align:center;">
                                             <%= idx + 1 %>
                                         </td>
-                                        <td>
-                                            <%= item.TenLoai %>
-                                        </td>
-                                        <td style="text-align:center;">
-                                            <button class="btn btn-warning btn-sm"
-                                                onclick="editLoai('<%= item.MaLoai %>', '<%= item.TenLoai %>')">Sửa</button>
-                                            <form action="/admin/quan-ly/loai-chu-de/xoa/<%= item.MaLoai %>"
-                                                method="POST" style="display:inline"
-                                                onsubmit="return confirm('Xóa loại chủ đề này?')">
-                                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                                            </form>
-                                        </td>
+
+                                        <%# Ô tên %>
+                                            <td style="vertical-align:middle;">
+                                                <%# Chế độ xem - mặc định hiện %>
+                                                    <span id="label-<%= item.MaLoai %>">
+                                                        <%= item.TenLoai %>
+                                                    </span>
+
+                                                    <%# Chế độ sửa - ẩn mặc định %>
+                                                        <form id="form-<%= item.MaLoai %>"
+                                                            action="/admin/quan-ly/loai-chu-de/sua/<%= item.MaLoai %>"
+                                                            method="POST" style="display:none;">
+                                                            <input type="text" name="TenLoai"
+                                                                id="input-<%= item.MaLoai %>"
+                                                                class="form-control form-control-sm"
+                                                                value="<%= item.TenLoai %>" required>
+                                                        </form>
+                                            </td>
+
+                                            <%# Ô nút %>
+                                                <td style="text-align:center; vertical-align:middle;">
+                                                    <%# Nút Sửa + Xóa: hiện mặc định %>
+                                                        <div id="btns-view-<%= item.MaLoai %>">
+                                                            <button class="btn btn-warning btn-sm"
+                                                                onclick="batDauSua('<%= item.MaLoai %>')">Sửa</button>
+                                                            <form
+                                                                action="/admin/quan-ly/loai-chu-de/xoa/<%= item.MaLoai %>"
+                                                                method="POST" style="display:inline"
+                                                                onsubmit="return confirm('Xóa loại chủ đề này?')">
+                                                                <button type="submit"
+                                                                    class="btn btn-danger btn-sm">Xóa</button>
+                                                            </form>
+                                                        </div>
+
+                                                        <%# Nút Lưu + Hủy: ẩn mặc định %>
+                                                            <div id="btns-edit-<%= item.MaLoai %>"
+                                                                style="display:none;">
+                                                                <button type="button" class="btn btn-success btn-sm"
+                                                                    onclick="luuSua('<%= item.MaLoai %>')">Lưu</button>
+                                                                <button type="button" class="btn btn-secondary btn-sm"
+                                                                    onclick="huyySua('<%= item.MaLoai %>')">Hủy</button>
+                                                            </div>
+                                                </td>
                                     </tr>
                                     <% }); %>
                                         <% } else { %>
@@ -59,49 +99,38 @@
                     </table>
                 </div>
 
-                <!-- Modal Thêm / Sửa Loại Chủ Đề -->
-                <div class="modal fade" id="modalThemLoai" tabindex="-1">
-                    <div class="modal-dialog" style="max-width:500px;">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="modalLoaiTitle">Thêm Loại Chủ Đề Mới</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <form id="formLoai" action="/admin/quan-ly/loai-chu-de/them" method="POST">
-                                <div class="modal-body">
-                                    <input type="hidden" id="editMaLoai" name="_editMaLoai" value="">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Tên loại:</label>
-                                        <input type="text" name="TenLoai" id="inputTenLoai" class="form-control"
-                                            placeholder="Nhập tên loại chủ đề..." required>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Đóng</button>
-                                    <button type="submit" class="btn btn-primary" id="btnSubmitLoai">Tạo</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
                 <script>
-                    function editLoai(maLoai, tenLoai) {
-                        document.getElementById('modalLoaiTitle').textContent = 'Sửa Loại Chủ Đề';
-                        document.getElementById('inputTenLoai').value = tenLoai;
-                        document.getElementById('btnSubmitLoai').textContent = 'Lưu';
-                        // Đổi action sang route sửa — cần thêm route POST /admin/quan-ly/loai-chu-de/sua/:id
-                        document.getElementById('formLoai').action = '/admin/quan-ly/loai-chu-de/sua/' + maLoai;
-                        new bootstrap.Modal(document.getElementById('modalThemLoai')).show();
+                    function batDauSua(maLoai) {
+                        // Đóng tất cả dòng đang mở
+                        document.querySelectorAll('[id^="btns-edit-"]').forEach(function (el) {
+                            if (el.style.display !== 'none') {
+                                var id = el.id.replace('btns-edit-', '');
+                                _dongSua(id);
+                            }
+                        });
+
+                        // Mở dòng này
+                        document.getElementById('label-' + maLoai).style.display = 'none';
+                        document.getElementById('form-' + maLoai).style.display = 'block';
+                        document.getElementById('btns-view-' + maLoai).style.display = 'none';
+                        document.getElementById('btns-edit-' + maLoai).style.display = 'block';
+                        document.getElementById('input-' + maLoai).focus();
                     }
 
-                    // Reset modal khi mở để thêm mới
-                    document.getElementById('modalThemLoai').addEventListener('show.bs.modal', function (e) {
-                        if (!e.relatedTarget) return; // mở bằng JS (editLoai) — không reset
-                        document.getElementById('modalLoaiTitle').textContent = 'Thêm Loại Chủ Đề Mới';
-                        document.getElementById('inputTenLoai').value = '';
-                        document.getElementById('btnSubmitLoai').textContent = 'Tạo';
-                        document.getElementById('formLoai').action = '/admin/quan-ly/loai-chu-de/them';
-                    });
+                    function luuSua(maLoai) {
+                        document.getElementById('form-' + maLoai).submit();
+                    }
+
+                    function huyySua(maLoai) {
+                        var label = document.getElementById('label-' + maLoai);
+                        document.getElementById('input-' + maLoai).value = label.textContent.trim();
+                        _dongSua(maLoai);
+                    }
+
+                    function _dongSua(maLoai) {
+                        document.getElementById('label-' + maLoai).style.display = 'inline';
+                        document.getElementById('form-' + maLoai).style.display = 'none';
+                        document.getElementById('btns-view-' + maLoai).style.display = 'block';
+                        document.getElementById('btns-edit-' + maLoai).style.display = 'none';
+                    }
                 </script>

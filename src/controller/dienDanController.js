@@ -67,7 +67,7 @@ const baiVietMoi = async (req, res) => {
 
     try {
         const { count, rows: baiViets } = await db.BaiViet.findAndCountAll({
-            where: { TrangThai: 'Đã duyệt' },
+            where: { TrangThai: 'Đã duyệt' },          // ← khớp DB
             include: [
                 { model: db.ThanhVien, attributes: ['HoTen', 'AnhDaiDien'] },
                 { model: db.QuanTriVien, attributes: ['HoTen', 'AnhDaiDien'] },
@@ -82,7 +82,6 @@ const baiVietMoi = async (req, res) => {
             attributes: ['MaQTV', 'TenDangNhap', 'AnhDaiDien'],
         });
 
-        // Map về object phẳng cho view
         const baiVietsMapped = baiViets.map(bv => ({
             MaBV: bv.MaBV,
             TieuDe: bv.TieuDeBV,
@@ -110,29 +109,18 @@ const locBaiViet = async (req, res) => {
     const limit = 8;
     const offset = (page - 1) * limit;
     const sortOrder = req.query.sortOrder || 'newest';
-    const isAllPosts = req.query.isAllPosts === 'true';
 
     try {
-        // Xây dựng order condition
-        let orderCondition = [['NgayDang', 'DESC']]; // mặc định mới nhất
+        let orderCondition = [['NgayDang', 'DESC']];
         switch (sortOrder) {
-            case 'oldest':
-                orderCondition = [['NgayDang', 'ASC']];
-                break;
-            case 'az':
-                orderCondition = [['TieuDeBV', 'ASC']];
-                break;
-            case 'za':
-                orderCondition = [['TieuDeBV', 'DESC']];
-                break;
-            default:
-                orderCondition = [['NgayDang', 'DESC']];
+            case 'oldest': orderCondition = [['NgayDang', 'ASC']]; break;
+            case 'az': orderCondition = [['TieuDeBV', 'ASC']]; break;
+            case 'za': orderCondition = [['TieuDeBV', 'DESC']]; break;
+            default: orderCondition = [['NgayDang', 'DESC']];
         }
 
-        const whereCondition = { TrangThai: 'Đã duyệt' };
-
         const { count, rows: baiViets } = await db.BaiViet.findAndCountAll({
-            where: whereCondition,
+            where: { TrangThai: 'Đã duyệt' },          // ← khớp DB
             include: [
                 { model: db.ThanhVien, attributes: ['HoTen', 'AnhDaiDien'] },
                 { model: db.QuanTriVien, attributes: ['HoTen', 'AnhDaiDien'] },
@@ -143,10 +131,9 @@ const locBaiViet = async (req, res) => {
             offset,
         });
 
-        // Đếm số bình luận
         const baiVietsWithCount = await Promise.all(baiViets.map(async (bv) => {
             const soBL = await db.BinhLuan.count({
-                where: { MaBV: bv.MaBV, TrangThai: 'DaDuyet' }
+                where: { MaBV: bv.MaBV, TrangThai: 'Đã duyệt' }, // ← khớp DB
             });
             return {
                 MaBV: bv.MaBV,
@@ -168,7 +155,7 @@ const locBaiViet = async (req, res) => {
             danhSachQTV,
             currentPage: page,
             totalPages: Math.ceil(count / limit),
-            currentSort: sortOrder, // để biết đang lọc theo gì
+            currentSort: sortOrder,
         });
     } catch (error) {
         console.error('locBaiViet error:', error);
@@ -207,7 +194,12 @@ const chuDeTheoLoai = async (req, res) => {
         });
 
         res.render('DienDanThaoLuan/ChuDe', {
-            chuDes: chuDes.map(cd => ({ MaCD: cd.MaCD, TenCD: cd.TenCD, TenLoai: loai.TenLoai, SoBai: cd.dataValues.SoBai || 0, })),
+            chuDes: chuDes.map(cd => ({
+                MaCD: cd.MaCD,
+                TenCD: cd.TenCD,
+                TenLoai: loai.TenLoai,
+                SoBai: cd.dataValues.SoBai || 0,
+            })),
             TenLoai: loai.TenLoai,
             MaLoai: loai.MaLoai,
             currentPage: page,
@@ -234,7 +226,7 @@ const baiVietTheoCD = async (req, res) => {
         if (!chuDe) return res.status(404).send('Chủ đề không tồn tại!');
 
         const { count, rows: baiViets } = await db.BaiViet.findAndCountAll({
-            where: { TrangThai: 'Đã duyệt', MaCD: maCD },
+            where: { TrangThai: 'Đã duyệt', MaCD: maCD }, // ← khớp DB
             include: [
                 { model: db.ThanhVien, attributes: ['HoTen', 'AnhDaiDien'] },
                 { model: db.QuanTriVien, attributes: ['HoTen', 'AnhDaiDien'] },
@@ -276,13 +268,9 @@ const baiVietTheoCD = async (req, res) => {
 // ─── Nội dung bài viết ────────────────────────────────────────────────────────
 const noiDungBaiViet = async (req, res) => {
     const maBV = req.params.MaBV;
-    console.log("mã bài viết:", maBV); // Debug: Kiểm tra MaBV nhận được
     try {
         const baiViet = await db.BaiViet.findOne({
-            where: {
-                MaBV: maBV,
-                // TrangThai: 'DaDuyet' }
-            },
+            where: { MaBV: maBV },
             include: [
                 { model: db.ThanhVien, attributes: ['MaTV', 'TenDangNhap', 'HoTen', 'AnhDaiDien'] },
                 { model: db.QuanTriVien, attributes: ['MaQTV', 'TenDangNhap', 'HoTen', 'AnhDaiDien'] },
@@ -293,13 +281,12 @@ const noiDungBaiViet = async (req, res) => {
 
         const { noiDungVanBan, codeContent } = parseXmlContent(baiViet.NoiDung);
 
-        // Người viết bài
         const nguoiVietBai = baiViet.ThanhVien || baiViet.QuanTriVien;
         const idNguoiViet = baiViet.ThanhVien ? baiViet.MaTV : baiViet.MaQTV;
 
-        // Lấy bình luận đã duyệt
+        // ← SỬA LỖI CHÍNH: 'DaDuyet' → 'Hiển thị' để bình luận vừa gửi hiện ra
         const binhLuansRaw = await db.BinhLuan.findAll({
-            where: { MaBV: maBV, TrangThai: 'DaDuyet' },
+            where: { MaBV: maBV, TrangThai: 'Đã duyệt' },
             include: [
                 { model: db.ThanhVien, attributes: ['MaTV', 'TenDangNhap', 'AnhDaiDien'] },
                 { model: db.QuanTriVien, attributes: ['MaQTV', 'TenDangNhap', 'AnhDaiDien'] },
@@ -307,7 +294,6 @@ const noiDungBaiViet = async (req, res) => {
             order: [['NgayGui', 'ASC']],
         });
 
-        // Map bình luận sang object partial cần
         const binhLuans = binhLuansRaw.map(bl => {
             const nguoiBL = bl.ThanhVien || bl.QuanTriVien;
             const { noiDungVanBan: ndbl, codeContent: blCode } = parseXmlContent(bl.NoiDung);
@@ -375,7 +361,7 @@ const postThemBV = async (req, res) => {
             NoiDung: noiDungXML,
             MaCD,
             MaTV: userId,
-            TrangThai: 'ChoXetDuyet',
+            TrangThai: 'Chờ duyệt',     // ← khớp DB (không phải 'ChoXetDuyet')
             NgayDang: new Date(),
         });
         req.session.tempData = { successMessage: 'Bài viết đã được gửi, chờ xét duyệt!' };
@@ -455,7 +441,6 @@ const postChinhSuaBV = async (req, res) => {
     const userId = req.session.userId;
     const { TieuDeBV, NoiDung, CodeContent, MaCD } = req.body;
 
-    // Validation
     if (!TieuDeBV || !NoiDung || !MaCD) {
         const baiViet = await db.BaiViet.findOne({ where: { MaBV: maBV, MaTV: userId } });
         const chuDeList = await db.ChuDe.findAll({ include: [{ model: db.LoaiCD }] });
@@ -473,7 +458,7 @@ const postChinhSuaBV = async (req, res) => {
         baiViet.TieuDeBV = TieuDeBV;
         baiViet.NoiDung = buildXmlContent(NoiDung, CodeContent);
         baiViet.MaCD = MaCD;
-        baiViet.TrangThai = 'ChoXetDuyet';
+        baiViet.TrangThai = 'Chờ duyệt';   // ← khớp DB
         await baiViet.save();
 
         req.session.tempData = { successMessage: 'Bài viết đã được cập nhật, chờ xét duyệt lại!' };
@@ -503,7 +488,6 @@ const xoaBaiViet = async (req, res) => {
 };
 
 // ─── Góp ý ────────────────────────────────────────────────────────────────────
-// ─── GET Góp ý (render form) ─────────────────────────────────────────────────
 const getGopY = (req, res) => {
     res.render('DienDanThaoLuan/GopY');
 };
@@ -513,20 +497,21 @@ const postGopY = async (req, res) => {
     const userId = req.session.userId;
 
     if (!NoiDung) {
-        return res.render('DienDanThaoLuan/GopY', { errorMessage: 'Vui lòng nhập nội dung góp ý!' });
+        return res.json({ success: false, message: 'Nội dung góp ý không được để trống!' });
     }
 
     try {
+        // ← KHÔNG truyền ID — để DB tự sinh (INTEGER IDENTITY)
         await db.GopY.create({
             NoiDung,
             MaTV: userId,
-            NgayGui: Date.now(),
+            NgayGui: new Date(),
             TrangThai: false,
         });
-        return res.render('DienDanThaoLuan/GopY', { successMessage: 'Cảm ơn góp ý của bạn!' });
+        return res.json({ success: true, message: 'Cảm ơn bạn đã góp ý!' });
     } catch (error) {
         console.error('postGopY error:', error);
-        return res.render('DienDanThaoLuan/GopY', { errorMessage: 'Đã xảy ra lỗi khi gửi góp ý!' });
+        return res.json({ success: false, message: 'Đã xảy ra lỗi!' });
     }
 };
 
@@ -605,7 +590,6 @@ const thongTinNguoiDung = async (req, res) => {
     const offset = (page - 1) * limit;
 
     try {
-        // Tìm thành viên hoặc admin
         let thongTin = await db.ThanhVien.findOne({ where: { MaTV: id } });
         let isAd = false;
         if (!thongTin) {
@@ -614,7 +598,11 @@ const thongTinNguoiDung = async (req, res) => {
         }
         if (!thongTin) return res.status(404).send('Người dùng không tồn tại!');
 
-        const whereClause = isAd ? { MaQTV: id, TrangThai: 'DaDuyet' } : { MaTV: id, TrangThai: 'DaDuyet' };
+        // ← khớp DB: 'Đã duyệt' thay vì 'DaDuyet'
+        const whereClause = isAd
+            ? { MaQTV: id, TrangThai: 'Đã duyệt' }
+            : { MaTV: id, TrangThai: 'Đã duyệt' };
+
         const { count, rows: baiViets } = await db.BaiViet.findAndCountAll({
             where: whereClause,
             order: [['NgayDang', 'DESC']],
