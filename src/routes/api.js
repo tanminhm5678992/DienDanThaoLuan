@@ -49,9 +49,7 @@ router.get('/api/thong-bao/unread', requireAuth, async (req, res) => {
     }
 });
 
-// ─── AI Code Suggest — Ollama local, miễn phí, không giới hạn ────────────────
-// Khi chạy Docker: OLLAMA_HOST=http://ollama:11434 (tên service trong compose)
-// Khi chạy local:  OLLAMA_HOST=http://localhost:11434
+// ─── AI Code Suggest — Ollama local ───────────────────────────────────────────
 const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5-coder:1.5b';
 
@@ -136,6 +134,59 @@ router.get('/api/ai-status', async (req, res) => {
         res.json({ online: true, models, ready, using: OLLAMA_MODEL });
     } catch {
         res.json({ online: false, message: 'Ollama chưa chạy' });
+    }
+});
+
+// ─── AI Chat (sử dụng Ollama local, thay thế DeepSeek) ─────────────────────────
+router.post('/api/chat', async (req, res) => {
+    const { messages, currentCode, language } = req.body;
+    if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ success: false, error: 'Invalid messages' });
+    }
+
+    // Xây dựng prompt đầy đủ với context code và lịch sử hội thoại
+    let conversation = `Bạn là trợ lý AI chuyên về lập trình, giúp người dùng viết code, review code, gợi ý cải thiện.
+Ngôn ngữ hiện tại: ${language || 'unknown'}.
+Đoạn code hiện tại của người dùng:
+\`\`\`${language || ''}
+${currentCode || ''}
+\`\`\`
+Hãy trả lời bằng tiếng Việt, ngắn gọn, hữu ích. Nếu đề xuất code, hãy xuất code trong block \`\`\` với đúng ngôn ngữ.\n\n`;
+
+    // Chỉ lấy 6 tin nhắn gần nhất để tránh token quá dài
+    const recentMessages = messages.slice(-6);
+    for (const msg of recentMessages) {
+        conversation += `${msg.role === 'user' ? 'Người dùng' : 'Trợ lý'}: ${msg.content}\n`;
+    }
+    conversation += 'Trợ lý:';
+
+    try {
+        const response = await fetch(`${OLLAMA_HOST}/api/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: OLLAMA_MODEL,
+                prompt: conversation,
+                stream: false,
+                options: {
+                    temperature: 0.7,
+                    top_p: 0.9,
+                    num_predict: 600,
+                    stop: ['\nNgười dùng:', '\nTrợ lý:']
+                }
+            }),
+            signal: AbortSignal.timeout(30000),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ollama error: ${response.status}`);
+        }
+        const data = await response.json();
+        const reply = data.response.trim();
+        return res.json({ success: true, reply });
+    } catch (err) {
+        console.error('Ollama chat error:', err);
+        return res.status(500).json({ success: false, error: 'Ollama không phản hồi. Hãy kiểm tra docker hoặc khởi động lại Ollama.' });
     }
 });
 

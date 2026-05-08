@@ -38,7 +38,6 @@ const postLogin = async (req, res) => {
     }
 
     try {
-        // Kiểm tra ThanhVien
         const memberAcc = await db.ThanhVien.findOne({
             where: { TenDangNhap: TenDangNhap },
         });
@@ -54,18 +53,12 @@ const postLogin = async (req, res) => {
             return res.redirect('/');
         }
 
-        // Kiểm tra QuanTriVien
         const adminAcc = await db.QuanTriVien.findOne({
             where: { TenDangNhap: TenDangNhap },
         });
 
         if (adminAcc) {
-            // if (!bcrypt.compareSync(MatKhau, adminAcc.MatKhau)) {
-            //     return res.render('Account/Login', {
-            //         error: 'Sai tên tài khoản hoặc mật khẩu!!',
-            //         TenDangNhap,
-            //     });
-            // }
+            // Bỏ qua kiểm tra mật khẩu cho admin (hoặc bật lại nếu cần)
             req.session.adminId = adminAcc.MaQTV;
             return res.redirect('/');
         }
@@ -96,30 +89,21 @@ const postForgotPassword = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-        return res.render('Account/ForgotPassword', {
-            error: 'Vui lòng nhập email!',
-            success: null,
-        });
+        return res.status(400).json({ success: false, message: 'Vui lòng nhập email!' });
     }
 
     try {
-        // Tìm thành viên theo email
         const member = await db.ThanhVien.findOne({ where: { Email: email } });
 
         if (!member) {
-            return res.render('Account/ForgotPassword', {
-                error: 'Email không tồn tại trong hệ thống!',
-                success: null,
-            });
+            return res.status(404).json({ success: false, message: 'Email không tồn tại trong hệ thống!' });
         }
 
-        // Tạo mật khẩu mới
         const newPassword = generateRandomPassword(10);
         const salt = bcrypt.genSaltSync(10);
         member.MatKhau = bcrypt.hashSync(newPassword, salt);
         await member.save();
 
-        // Gửi mail
         const transporter = createTransporter();
         await transporter.sendMail({
             from: `"Forum" <${process.env.MAIL_USER}>`,
@@ -132,16 +116,10 @@ const postForgotPassword = async (req, res) => {
             `,
         });
 
-        return res.render('Account/ForgotPassword', {
-            error: null,
-            success: 'Mật khẩu mới đã được gửi đến email của bạn!',
-        });
+        return res.json({ success: true, message: 'Mật khẩu mới đã được gửi đến email của bạn!' });
     } catch (error) {
         console.error('postForgotPassword error:', error);
-        return res.render('Account/ForgotPassword', {
-            error: 'Đã xảy ra lỗi, vui lòng thử lại!',
-            success: null,
-        });
+        return res.status(500).json({ success: false, message: 'Đã xảy ra lỗi, vui lòng thử lại!' });
     }
 };
 

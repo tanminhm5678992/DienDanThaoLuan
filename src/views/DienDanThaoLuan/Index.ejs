@@ -1,5 +1,337 @@
-<% chuDeList.forEach(cd=> { %>
-    <div>
-        <%= cd.TenCD %>
+<style>
+    /* ── Hero ── */
+    .home-hero {
+        /* background: linear-gradient(135deg, #0d1422 0%, #111827 100%); */
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2.5rem 2rem;
+        margin: 1.5rem 0 1.2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .home-hero::before {
+        content: '';
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(99, 179, 237, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .home-hero::after {
+        content: '</>';
+        position: absolute;
+        bottom: 1rem;
+        right: 1.5rem;
+        font-family: var(--mono);
+        font-size: 3.5rem;
+        color: rgba(99, 179, 237, 0.05);
+        font-weight: 700;
+        pointer-events: none;
+    }
+
+    .hero-title {
+        font-family: var(--mono);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.4rem;
+    }
+
+    .hero-title span {
+        color: var(--accent);
+    }
+
+    .hero-sub {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .hero-stats {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(99, 179, 237, 0.06);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 5px 12px;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-family: var(--mono);
+    }
+
+    .stat-chip i {
+        color: var(--accent);
+    }
+
+    /* ── Category grid ── */
+    .section-label {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .category-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 0.2s;
+        position: relative;
+        overflow: hidden;
+        display: block;
+    }
+
+    .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--accent), var(--accent2));
+        border-radius: 3px 0 0 3px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .category-card:hover {
+        border-color: rgba(99, 179, 237, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        color: var(--text-primary);
+    }
+
+    .category-card:hover::before {
+        opacity: 1;
+    }
+
+    .cat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: rgba(99, 179, 237, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        margin-bottom: 0.6rem;
+        color: var(--accent);
+    }
+
+    .cat-name {
+        font-size: 0.88rem;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .cat-count {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        font-family: var(--mono);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .sidebar-card-header {
+        background: rgb(26, 74, 152);
+        border-bottom: 1px solid var(--border);
+        padding: 0.7rem 1rem;
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .quick-links {
+        list-style: none;
+        padding: 0.5rem;
+        margin: 0;
+    }
+
+    .quick-links li a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.5rem 0.7rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.84rem;
+        border-radius: 8px;
+        transition: all 0.15s;
+    }
+
+    .quick-links li a:hover {
+        background: rgba(99, 179, 237, 0.08);
+        color: var(--accent);
+    }
+
+    .quick-links li a i {
+        width: 16px;
+        text-align: center;
+    }
+
+    /* CTA post */
+    .cta-post {
+        background: linear-gradient(135deg, rgba(99, 179, 237, 0.12), rgba(104, 211, 145, 0.08));
+        border: 1px solid rgba(99, 179, 237, 0.2);
+        border-radius: 12px;
+        padding: 1.1rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .cta-post p {
+        font-size: 0.83rem;
+        color: var(--text-muted);
+        margin-bottom: 0.7rem;
+    }
+
+    .btn-post {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--accent);
+        color: #0b0f1a;
+        padding: 0.45rem 1.1rem;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-post:hover {
+        background: #90cdf4;
+        color: #0b0f1a;
+        transform: translateY(-1px);
+    }
+</style>
+
+<div class="row mt-0">
+    <!-- Main -->
+    <div class="col-lg-8">
+        <!-- Hero -->
+        <div class="home-hero">
+            <div class="hero-title">Chào mừng đến <span>IT Xperience</span></div>
+            <p class="hero-sub">Diễn đàn trao đổi kiến thức IT dành cho sinh viên — hỏi đáp, chia sẻ, cùng phát triển.
+            </p>
+            <div class="hero-stats">
+                <div class="stat-chip"><i class="fas fa-users"></i> Cộng đồng IT</div>
+                <div class="stat-chip"><i class="fas fa-code"></i> Hỏi đáp code</div>
+                <div class="stat-chip"><i class="fas fa-play-circle"></i> Run code online</div>
+                <div class="stat-chip"><i class="fas fa-graduation-cap"></i> Học từ thực tế</div>
+            </div>
+        </div>
+
+        <!-- Danh mục chủ đề -->
+        <div class="section-label"><i class="fas fa-layer-group"></i> Danh mục chủ đề</div>
+
+        <% const catIcons=['💻','🎨','🗄️','🌐','🤖','🔒','📱','⚙️','📊','🧪']; %>
+            <div class="category-grid">
+                <% if (locals.chuDeList && chuDeList.length> 0) { %>
+                    <% chuDeList.forEach(function(cd, i) { %>
+                        <a href="/chu-de/<%= cd.MaLoai %>" class="category-card">
+                            <div class="cat-icon">
+                                <%= catIcons[i % catIcons.length] %>
+                            </div>
+                            <div class="cat-name">
+                                <%= cd.TenLoai || cd.TenCD %>
+                            </div>
+                            <div class="cat-count">
+                                <% if (cd.SoBai !==undefined) { %>
+                                    <%= cd.SoBai %> bài viết<% } %>
+                            </div>
+                        </a>
+                        <% }); %>
+                            <% } else { %>
+                                <!-- Fallback nếu chưa có dữ liệu -->
+                                <div class="category-card" style="opacity:0.5;pointer-events:none;">
+                                    <div class="cat-icon">💻</div>
+                                    <div class="cat-name">Đang tải...</div>
+                                </div>
+                                <% } %>
+            </div>
     </div>
-    <% }) %>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4 mt-3 mt-lg-0">
+        <!-- CTA đăng bài -->
+        <% if (locals.userId) { %>
+            <div class="cta-post">
+                <p>Bạn có câu hỏi hoặc muốn chia sẻ kiến thức?</p>
+                <a href="/them-bai-viet" class="btn-post"><i class="fas fa-pen"></i> Đăng bài viết</a>
+            </div>
+            <% } else if (!locals.adminId) { %>
+                <div class="cta-post">
+                    <p>Đăng nhập để đặt câu hỏi và chia sẻ kiến thức!</p>
+                    <a href="/account/login" class="btn-post"><i class="fas fa-sign-in-alt"></i> Đăng nhập ngay</a>
+                </div>
+                <% } %>
+
+                    <!-- Truy cập nhanh -->
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-header"><i class="fas fa-bolt"></i> Truy cập nhanh</div>
+                        <ul class="quick-links">
+                            <li><a href="/bai-viet-moi"><i class="fas fa-fire-alt"></i> Bài viết mới nhất</a></li>
+                            <li><a href="/code/execution-result"><i class="fas fa-play-circle"
+                                        style="color:var(--accent2)"></i> Run Code Online</a></li>
+                            <li><a href="/gop-y"><i class="fas fa-comment-dots"></i> Góp ý & Phản hồi</a></li>
+                            <% if (locals.userId || locals.adminId) { %>
+                                <li><a href="/thong-bao"><i class="fas fa-bell" style="color:var(--accent3)"></i> Thông
+                                        báo của tôi</a></li>
+                                <li><a href="/bai-viet-cua-toi"><i class="fas fa-file-alt"></i> Bài viết của tôi</a>
+                                </li>
+                                <% } %>
+                        </ul>
+                    </div>
+
+                    <!-- Admin panel sidebar -->
+                    <%- include('../Shared/_PartialQTV') %>
+    </div>
+</div>

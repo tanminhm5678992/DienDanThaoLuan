@@ -1,85 +1,136 @@
 <style>
     #menu {
-        background: #0d0d14;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        position: relative;
-        z-index: 99;
-    }
-
-    #menu .navbar {
-        padding: 0;
+        background: #0d1422;
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 57px;
+        z-index: 190;
     }
 
     #menu .nav-link {
-        color: rgba(255, 255, 255, 0.65) !important;
-        font-size: 0.8rem;
+        color: var(--text-muted) !important;
+        font-size: 0.78rem;
         font-weight: 600;
-        letter-spacing: 0.06em;
-        padding: 0.75rem 0.9rem !important;
+        letter-spacing: 0.08em;
+        padding: 0.72rem 1rem !important;
+        font-family: var(--mono);
         transition: color 0.2s;
         position: relative;
+        text-transform: uppercase;
     }
 
     #menu .nav-link:hover,
     #menu .nav-link.active {
-        color: #4f8ef7 !important;
+        color: var(--accent) !important;
     }
 
     #menu .nav-link.active::after {
         content: '';
         position: absolute;
         bottom: 0;
-        left: 0.9rem;
-        right: 0.9rem;
+        left: 1rem;
+        right: 1rem;
         height: 2px;
-        background: linear-gradient(90deg, #4f8ef7, #a78bfa);
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
         border-radius: 2px;
     }
 
+    /* tag icon trước nav item */
+    #menu .nav-link i {
+        font-size: 0.75rem;
+        margin-right: 5px;
+        opacity: 0.7;
+    }
+
     #menu .dropdown-menu {
-        background: #111118;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: #1a2235;
+        border: 1px solid var(--border);
         border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+        padding: 6px;
         margin-top: 0 !important;
     }
 
     #menu .dropdown-item {
-        color: #d0d0e0;
-        font-size: 0.83rem;
-        padding: 0.5rem 1rem;
-        transition: background 0.15s, color 0.15s;
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 7px;
+        font-family: var(--sans);
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #menu .dropdown-item::before {
+        content: '#';
+        color: var(--accent2);
+        font-weight: 700;
+        font-size: 0.75rem;
     }
 
     #menu .dropdown-item:hover {
-        background: rgba(79, 142, 247, 0.1);
-        color: #4f8ef7;
+        background: rgba(99, 179, 237, 0.1);
+        color: var(--accent);
     }
 
-    #menu .badge {
-        font-size: 0.65rem;
-        padding: 2px 5px;
+    #menu .nav-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fc4e4e;
+        color: #fff;
+        font-size: 0.58rem;
+        font-weight: 700;
+        min-width: 15px;
+        height: 15px;
+        border-radius: 8px;
+        padding: 0 3px;
+        margin-left: 4px;
+        font-family: var(--mono);
+        vertical-align: middle;
+    }
+
+    /* Run Code đặc biệt */
+    #menu .nav-link.nav-runcode {
+        color: var(--accent2) !important;
+        border: 1px solid rgba(104, 211, 145, 0.2);
+        border-radius: 7px;
+        margin: 8px 4px;
+        padding: 0.4rem 0.85rem !important;
+    }
+
+    #menu .nav-link.nav-runcode:hover {
+        background: rgba(104, 211, 145, 0.1);
+        border-color: var(--accent2);
+    }
+
+    #menu .nav-link.nav-runcode::after {
+        display: none;
     }
 </style>
 
 <div id="menu">
     <div class="container">
-        <nav class="navbar navbar-expand-lg">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
-                style="border-color:rgba(255,255,255,0.2)">
-                <span class="navbar-toggler-icon" style="filter:invert(1)"></span>
+        <nav class="navbar navbar-expand-lg p-0">
+            <button class="navbar-toggler my-1" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                style="border-color:rgba(99,179,237,0.3); padding:4px 8px;">
+                <i class="fas fa-bars" style="color:var(--accent);font-size:0.85rem;"></i>
             </button>
             <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav me-auto align-items-lg-center">
+
                     <li class="nav-item">
-                        <a class="nav-link" href="/">TRANG CHỦ</a>
+                        <a class="nav-link" href="/"><i class="fas fa-home"></i>Trang chủ</a>
                     </li>
 
-                    <!-- Chủ đề dropdown -->
+                    <!-- Chủ đề -->
                     <% if (locals.loaiCDs && loaiCDs.length> 0) { %>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">CHỦ
-                                ĐỀ</a>
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-layer-group"></i>Chủ đề
+                            </a>
                             <ul class="dropdown-menu">
                                 <% loaiCDs.forEach(function(cd) { %>
                                     <li><a class="dropdown-item" href="/chu-de/<%= cd.MaLoai %>">
@@ -91,17 +142,16 @@
                         <% } %>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="/bai-viet-moi">BÀI VIẾT MỚI</a>
+                                <a class="nav-link" href="/bai-viet-moi"><i class="fas fa-fire-alt"></i>Bài viết mới</a>
                             </li>
 
                             <!-- Góp ý -->
                             <% if (locals.adminId) { %>
                                 <li class="nav-item">
-                                    <a class="nav-link position-relative" href="/admin/gop-y">
-                                        GÓP Ý
+                                    <a class="nav-link" href="/admin/gop-y">
+                                        <i class="fas fa-comment-dots"></i>Góp ý
                                         <% if (locals.soLuongGopY> 0) { %>
-                                            <span
-                                                class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                                            <span class="nav-badge">
                                                 <%= soLuongGopY %>
                                             </span>
                                             <% } %>
@@ -109,62 +159,46 @@
                                 </li>
                                 <% } else if (locals.userId) { %>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="/gop-y">GÓP Ý</a>
+                                        <a class="nav-link" href="/gop-y"><i class="fas fa-comment-dots"></i>Góp ý</a>
                                     </li>
                                     <% } %>
 
-                                        <!-- Thông báo -->
-                                        <% if (locals.userId || locals.adminId) { %>
+                                        <!-- Run Code -->
+                                        <li class="nav-item">
+                                            <a class="nav-link nav-runcode" href="/code/execution-result">
+                                                <i class="fas fa-play-circle"></i>Run Code
+                                            </a>
+                                        </li>
+
+                                        <!-- Separator admin -->
+                                        <% if (locals.adminId) { %>
                                             <li class="nav-item">
-                                                <a class="nav-link position-relative" href="/thong-bao">
-                                                    THÔNG BÁO
-                                                    <% if (locals.unreadCount> 0) { %>
-                                                        <span
-                                                            class="badge bg-danger position-absolute top-0 start-100 translate-middle">
-                                                            <%= unreadCount %>
+                                                <a class="nav-link" href="/admin/duyet-bai">
+                                                    <i class="fas fa-check-circle"></i>Duyệt bài
+                                                    <% if (locals.soLuongBaiViet> 0) { %>
+                                                        <span class="nav-badge">
+                                                            <%= soLuongBaiViet %>
                                                         </span>
                                                         <% } %>
                                                 </a>
                                             </li>
+                                            <li class="nav-item dropdown">
+                                                <a class="nav-link dropdown-toggle" href="#" role="button"
+                                                    data-bs-toggle="dropdown">
+                                                    <i class="fas fa-cog"></i>Quản lý
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="/admin/quan-ly/loai-chu-de">Loại
+                                                            chủ đề</a></li>
+                                                    <li><a class="dropdown-item" href="/admin/quan-ly/chu-de">Chủ đề</a>
+                                                    </li>
+                                                    <li><a class="dropdown-item" href="/admin/quan-ly-thanh-vien">Thành
+                                                            viên</a></li>
+                                                    <li><a class="dropdown-item" href="/admin/thong-bao-tong">Thông báo
+                                                            tổng</a></li>
+                                                </ul>
+                                            </li>
                                             <% } %>
-
-                                                <li class="nav-item">
-                                                    <a class="nav-link" href="/code/execution-result">RUN CODE</a>
-                                                </li>
-
-                                                <!-- Admin only -->
-                                                <% if (locals.adminId) { %>
-                                                    <li class="nav-item">
-                                                        <a class="nav-link position-relative" href="/admin/duyet-bai">
-                                                            DUYỆT BÀI
-                                                            <% if (locals.soLuongBaiViet> 0) { %>
-                                                                <span
-                                                                    class="badge bg-danger position-absolute top-0 start-100 translate-middle">
-                                                                    <%= soLuongBaiViet %>
-                                                                </span>
-                                                                <% } %>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item dropdown">
-                                                        <a class="nav-link dropdown-toggle" href="#" role="button"
-                                                            data-bs-toggle="dropdown">QUẢN LÝ CHỦ ĐỀ</a>
-                                                        <ul class="dropdown-menu">
-                                                            <li><a class="dropdown-item"
-                                                                    href="/admin/quan-ly/loai-chu-de">Loại chủ đề</a>
-                                                            </li>
-                                                            <li><a class="dropdown-item"
-                                                                    href="/admin/quan-ly/chu-de">Chủ đề</a></li>
-                                                        </ul>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a class="nav-link" href="/admin/quan-ly-thanh-vien">QUẢN LÝ
-                                                            THÀNH VIÊN</a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a class="nav-link" href="/admin/thong-bao-tong">THÔNG BÁO
-                                                            TỔNG</a>
-                                                    </li>
-                                                    <% } %>
                 </ul>
             </div>
         </nav>

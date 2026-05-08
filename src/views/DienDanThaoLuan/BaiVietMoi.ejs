@@ -1,77 +1,341 @@
 <style>
-    .admin {
-        background-color: #e7f3ff;
-        border-left: 2px solid #007bff;
-        padding: 15px;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
-        border-radius: 5px;
+    .post-list-wrap {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .post-list-header {
+        background: rgba(99, 179, 237, 0.05);
+        border-bottom: 1px solid var(--border);
+        padding: 0.85rem 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .post-list-title {
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: 0.05em;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .post-list-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .btn-new-post {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--accent);
+        color: #0b0f1a;
+        padding: 0.38rem 0.9rem;
+        border-radius: 7px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-new-post:hover {
+        background: #90cdf4;
+        color: #0b0f1a;
+    }
+
+    .btn-filter {
+        background: rgba(99, 179, 237, 0.08);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        padding: 0.38rem 0.8rem;
+        border-radius: 7px;
+        font-size: 0.78rem;
+        font-family: var(--mono);
+        transition: all 0.2s;
+    }
+
+    .btn-filter:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .filter-dropdown .dropdown-menu {
+        background: #1a2235;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 6px;
+    }
+
+    .filter-dropdown .dropdown-item {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        border-radius: 7px;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .filter-dropdown .dropdown-item:hover {
+        background: rgba(99, 179, 237, 0.1);
+        color: var(--accent);
+    }
+
+    /* Post items */
+    .post-item {
+        padding: 0.9rem 1.2rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        transition: background 0.15s;
+    }
+
+    .post-item:last-child {
+        border-bottom: none;
+    }
+
+    .post-item:hover {
+        background: rgba(99, 179, 237, 0.03);
+    }
+
+    .post-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        flex-shrink: 0;
+    }
+
+    .post-avatar-fallback {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #0b0f1a;
+        flex-shrink: 0;
+        font-family: var(--mono);
+    }
+
+    .post-body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .post-title {
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-decoration: none;
+        display: block;
+        margin-bottom: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: color 0.15s;
+    }
+
+    .post-title:hover {
+        color: var(--accent);
+    }
+
+    .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        flex-wrap: wrap;
+    }
+
+    .post-meta span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .post-meta i {
+        font-size: 0.7rem;
+    }
+
+    .post-admin-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(99, 179, 237, 0.12);
+        border: 1px solid rgba(99, 179, 237, 0.2);
+        color: var(--accent);
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 20px;
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .post-stats {
+        text-align: right;
+        flex-shrink: 0;
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        font-family: var(--mono);
+    }
+
+    .post-stats .reply-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(104, 211, 145, 0.08);
+        border: 1px solid rgba(104, 211, 145, 0.15);
+        color: var(--accent2);
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        margin-bottom: 4px;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 0.8rem;
+        opacity: 0.3;
+        display: block;
+    }
+
+    .empty-state p {
+        font-size: 0.88rem;
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+        background: var(--bg-card);
+        border-color: var(--border);
+        color: var(--text-muted);
+        font-family: var(--mono);
+        font-size: 0.82rem;
+        padding: 0.35rem 0.7rem;
+        transition: all 0.15s;
+    }
+
+    .pagination .page-link:hover {
+        background: rgba(99, 179, 237, 0.1);
+        color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #0b0f1a;
     }
 </style>
 
-<div class="row my-5">
-    <!-- Left Column -->
-    <div class="col-md-8">
-        <div class="flex-grow-1 me-3 bg-white p-2 rounded">
-            <div class="d-flex justify-content-end mb-2">
-                <h2 style="font-weight: bold; margin-right: auto; margin-left: 5px; color: gray">Bài viết mới</h2>
-                <div class="me-2">
-                    <button onclick="location.href='/them-bai-viet'" class="btn btn-primary">Thêm bài</button>
+<div class="row mt-3">
+    <!-- Main -->
+    <div class="col-lg-8">
+        <div class="post-list-wrap">
+            <div class="post-list-header">
+                <div class="post-list-title">
+                    <i class="fas fa-fire-alt"></i> Bài viết mới nhất
                 </div>
-                <div>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                            data-bs-toggle="dropdown">Lọc</button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/loc?sortOrder=newest&isAllPosts=true">Mới nhất</a></li>
-                            <li><a class="dropdown-item" href="/loc?sortOrder=oldest&isAllPosts=true">Lâu nhất</a></li>
-                            <li><a class="dropdown-item" href="/loc?sortOrder=az&isAllPosts=true">Tiêu đề bài viết từ
-                                    A-Z</a></li>
-                            <li><a class="dropdown-item" href="/loc?sortOrder=za&isAllPosts=true">Tiêu đề bài viết từ
-                                    Z-A</a></li>
-                        </ul>
-                    </div>
+                <div class="post-list-actions">
+                    <% if (locals.userId) { %>
+                        <a href="/them-bai-viet" class="btn-new-post"><i class="fas fa-pen"></i> Đăng bài</a>
+                        <% } %>
+                            <div class="dropdown filter-dropdown">
+                                <button class="btn-filter dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="fas fa-sliders-h"></i> Lọc
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="/loc?sortOrder=newest&isAllPosts=true"><i
+                                                class="fas fa-arrow-down me-2"></i>Mới nhất</a></li>
+                                    <li><a class="dropdown-item" href="/loc?sortOrder=oldest&isAllPosts=true"><i
+                                                class="fas fa-arrow-up me-2"></i>Cũ nhất</a></li>
+                                    <li><a class="dropdown-item" href="/loc?sortOrder=az&isAllPosts=true"><i
+                                                class="fas fa-sort-alpha-down me-2"></i>Tiêu đề A → Z</a></li>
+                                    <li><a class="dropdown-item" href="/loc?sortOrder=za&isAllPosts=true"><i
+                                                class="fas fa-sort-alpha-up me-2"></i>Tiêu đề Z → A</a></li>
+                                </ul>
+                            </div>
                 </div>
             </div>
 
-            <!-- Post Items -->
             <% if (baiViets && baiViets.length> 0) { %>
                 <% baiViets.forEach(function(t) { %>
-                    <div class="mb-1 rounded-0 border-top pt-3 <%= t.IsAdmin ? 'admin' : '' %>">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div class="d-flex align-items-center">
-                                    <img src="/Images/<%= t.AnhDaiDien || 'avatar.jpg' %>" alt="User Avatar"
-                                        class="img-fluid rounded-circle" width="50">
-                                    <div class="ms-3">
-                                        <h5 class="card-title mb-1">
-                                            <a href="/bai-viet/<%= t.MaBV %>" class="text-decoration-none text-dark">
-                                                <%= t.TieuDe %>
-                                            </a>
-                                        </h5>
-                                        <p class="text-muted">
-                                            <%= t.TenNguoiViet %>
-                                        </p>
+                    <div class="post-item">
+                        <!-- Avatar -->
+                        <% if (t.AnhDaiDien && t.AnhDaiDien !=='null' ) { %>
+                            <img src="/Images/<%= t.AnhDaiDien %>" alt="" class="post-avatar">
+                            <% } else { %>
+                                <div class="post-avatar-fallback">
+                                    <%= (t.TenNguoiViet || '?' ).charAt(0).toUpperCase() %>
+                                </div>
+                                <% } %>
+
+                                    <div class="post-body">
+                                        <a href="/bai-viet/<%= t.MaBV %>" class="post-title">
+                                            <%= t.TieuDe %>
+                                        </a>
+                                        <div class="post-meta">
+                                            <span><i class="fas fa-user"></i>
+                                                <%= t.TenNguoiViet %>
+                                            </span>
+                                            <span><i class="fas fa-clock"></i>
+                                                <%= t.NgayDang %>
+                                            </span>
+                                            <% if (t.TenCD) { %>
+                                                <span><i class="fas fa-tag"></i>
+                                                    <%= t.TenCD %>
+                                                </span>
+                                                <% } %>
+                                                    <% if (t.IsAdmin) { %>
+                                                        <span class="post-admin-badge"><i class="fas fa-shield-alt"></i>
+                                                            Admin</span>
+                                                        <% } %>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="text-end">
-                                    <p class="mb-1">Ngày đăng: <span class="text-muted">
-                                            <%= t.NgayDang %>
-                                        </span></p>
-                                    <p class="mb-0">Trả lời: <span class="text-muted">
+
+                                    <div class="post-stats">
+                                        <div class="reply-count"><i class="fas fa-comments"></i>
                                             <%= t.SoBL %>
-                                        </span></p>
-                                </div>
-                            </div>
-                        </div>
+                                        </div>
+                                    </div>
                     </div>
                     <% }); %>
-                        <% } %>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <i class="fas fa-scroll"></i>
+                                <p>Chưa có bài viết nào.<br>Hãy là người đầu tiên đăng bài!</p>
+                            </div>
+                            <% } %>
         </div>
 
         <!-- Phân trang -->
         <% if (locals.totalPages && totalPages> 1) { %>
-            <nav class="MenuTrang mt-3">
+            <nav>
                 <ul class="pagination justify-content-center">
                     <% for (let i=1; i <=totalPages; i++) { %>
                         <li class="page-item <%= currentPage == i ? 'active' : '' %>">
@@ -85,8 +349,8 @@
             <% } %>
     </div>
 
-    <!-- Right Column -->
-    <div class="col-md-4">
+    <!-- Sidebar -->
+    <div class="col-lg-4">
         <%- include('../Shared/_PartialQTV') %>
     </div>
 </div>

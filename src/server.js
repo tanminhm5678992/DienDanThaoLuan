@@ -28,6 +28,7 @@ app.use(session({
 
 // ─── Middleware toàn cục: inject locals cho layout/partials ───────────────────
 app.use(async (req, res, next) => {
+    res.locals.currentPath = req.path;
     // TempData
     res.locals.successMessage = req.session.tempData?.successMessage || null;
     res.locals.errorMessage = req.session.tempData?.errorMessage || null;

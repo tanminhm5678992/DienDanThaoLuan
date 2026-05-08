@@ -18,8 +18,8 @@
 <div class="code-container">
     <h3 class="section-title">Code:</h3>
     <div class="code-box" style="position:relative;">
-        <textarea name="CodeContent" id="Code"
-            class="form-control mt-2 codeContent" style="position:relative;z-index:2;background:transparent;"><%= locals.CodeContent || '' %></textarea>
+        <textarea name="CodeContent" id="Code" class="form-control mt-2 codeContent"
+            style="position:relative;z-index:2;background:transparent;"><%= locals.CodeContent || '' %></textarea>
         <div id="ghostLayer" aria-hidden="true"></div>
     </div>
     <div class="ai-hint-bar">
@@ -48,7 +48,6 @@
 <div class="tc-container" id="testCaseList">
     <h3 class="section-title">Test Cases:</h3>
     <div id="tcItems">
-        <!-- Test case mặc định -->
         <div class="tc-item" data-index="0">
             <div class="tc-header">
                 <span class="tc-label">Test case 1</span>
@@ -136,6 +135,22 @@
                     <% } else { %>
                         <div class="no-result">Nhấn <strong>Run</strong> để xem kết quả.</div>
                         <% } %>
+</div>
+
+<!-- Chat AI với DeepSeek/Ollama -->
+<div class="chat-container">
+    <div class="chat-header">
+        <i class="fas fa-robot" style="color:#4f8ef7;"></i> Trợ lý AI – Hỏi về code, review, gợi ý
+    </div>
+    <div id="chatMessages" class="chat-messages">
+        <div class="chat-message ai">💬 Xin chào! Tôi có thể giúp bạn viết code, review, gợi ý cải thiện. Hãy thử hỏi
+            tôi nhé.</div>
+    </div>
+    <div class="chat-input-area">
+        <textarea id="chatInput" rows="2"
+            placeholder="Nhập câu hỏi về code, yêu cầu review hoặc sinh code..."></textarea>
+        <button id="sendChatBtn" class="btn-send-chat">Gửi</button>
+    </div>
 </div>
 
 <style>
@@ -237,7 +252,6 @@
         transform: translateY(-1px);
     }
 
-    /* Test case input list */
     .tc-item {
         background: #fff;
         border: 1px solid #dee2e6;
@@ -309,7 +323,6 @@
         box-shadow: 0 0 0 0.2rem rgba(12, 136, 194, 0.25);
     }
 
-    /* Kết quả từng test case */
     .tc-result {
         border-radius: 8px;
         margin-bottom: 10px;
@@ -396,7 +409,6 @@
         color: #383d41;
     }
 
-    /* Border trái màu theo status */
     .tc-result.status-ac {
         border-left: 4px solid #28a745;
     }
@@ -469,11 +481,13 @@
         font-size: 1rem;
     }
 
-
-    /* ── AI Code Completion ────────────────────────────────────────────── */
+    /* AI Code Completion */
     #ghostLayer {
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         padding: 8px 10px;
         font-family: 'Courier New', Courier, monospace;
         font-size: 0.88rem;
@@ -484,12 +498,14 @@
         z-index: 1;
         overflow: hidden;
     }
+
     .ghost-suggestion {
         color: #6e7f8d;
         font-style: italic;
-        background: rgba(12,136,194,0.12);
+        background: rgba(12, 136, 194, 0.12);
         border-radius: 2px;
     }
+
     .ai-hint-bar {
         display: flex;
         align-items: center;
@@ -500,6 +516,7 @@
         border-top: 1px solid #2a3f55;
         flex-wrap: wrap;
     }
+
     .ai-kbd {
         background: #2a3f55;
         color: #7ec8e3;
@@ -509,25 +526,54 @@
         border: 1px solid #3a5068;
         font-family: monospace;
     }
+
     .ai-dot {
         display: inline-block;
-        width: 7px; height: 7px;
+        width: 7px;
+        height: 7px;
         border-radius: 50%;
         background: #3a5068;
         flex-shrink: 0;
         transition: background 0.2s;
     }
-    .ai-dot.active   { background: #a6e3a1; }
-    .ai-dot.thinking { background: #f9e2af; animation: aiPulse 0.8s ease-in-out infinite; }
-    @keyframes aiPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .ai-dot.active {
+        background: #a6e3a1;
+    }
+
+    .ai-dot.thinking {
+        background: #f9e2af;
+        animation: aiPulse 0.8s ease-in-out infinite;
+    }
+
+    @keyframes aiPulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.3;
+        }
+    }
+
     .ai-status {
         margin-left: auto;
         font-size: 0.78rem;
         color: #3a5068;
         transition: color 0.2s;
     }
-    .ai-status.active   { color: #a6e3a1; }
-    .ai-status.thinking { color: #f9e2af; animation: aiPulse 0.8s ease-in-out infinite; }
+
+    .ai-status.active {
+        color: #a6e3a1;
+    }
+
+    .ai-status.thinking {
+        color: #f9e2af;
+        animation: aiPulse 0.8s ease-in-out infinite;
+    }
+
     .btn-ai-suggest {
         background: none;
         border: 1px solid #0c88c2;
@@ -539,7 +585,159 @@
         transition: all 0.2s;
         margin-left: 6px;
     }
-    .btn-ai-suggest:hover { background: #0c88c2; color: #fff; }
+
+    .btn-ai-suggest:hover {
+        background: #0c88c2;
+        color: #fff;
+    }
+
+    /* Chat */
+    .chat-container {
+        margin: 30px auto 20px;
+        background: #1e1e2f;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        max-width: 82%;
+    }
+
+    .chat-header {
+        background: #0f0f1a;
+        padding: 12px 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chat-messages {
+        height: 320px;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #12121c;
+    }
+
+    .chat-message {
+        max-width: 85%;
+        padding: 10px 14px;
+        border-radius: 16px;
+        font-size: 0.85rem;
+        line-height: 1.45;
+        word-wrap: break-word;
+    }
+
+    .chat-message.user {
+        align-self: flex-end;
+        background: #4f8ef7;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .chat-message.ai {
+        align-self: flex-start;
+        background: #2d2d3a;
+        border-bottom-left-radius: 4px;
+        color: #e2e8f0;
+    }
+
+    .chat-message pre {
+        margin: 6px 0;
+        background: #1a1a2e;
+        padding: 8px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 0.75rem;
+    }
+
+    .btn-insert-code {
+        background: #2b6e9e;
+        border: none;
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        margin-top: 6px;
+        color: white;
+        cursor: pointer;
+    }
+
+    .btn-insert-code:hover {
+        background: #1f4f6e;
+    }
+
+    .chat-input-area {
+        display: flex;
+        padding: 12px 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 12px;
+        background: #0f0f1a;
+    }
+
+    #chatInput {
+        flex: 1;
+        background: #2a2a3c;
+        border: 1px solid #3a3a4c;
+        border-radius: 10px;
+        color: #f0f0f5;
+        padding: 8px 12px;
+        resize: none;
+        font-family: inherit;
+    }
+
+    .btn-send-chat {
+        background: #4f8ef7;
+        border: none;
+        border-radius: 10px;
+        padding: 0 20px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-send-chat:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .loading-dots {
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+    }
+
+    .loading-dots span {
+        animation: blink 1.4s infinite;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .loading-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .loading-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes blink {
+
+        0%,
+        20% {
+            opacity: 0;
+        }
+
+        50% {
+            opacity: 1;
+        }
+
+        80%,
+        100% {
+            opacity: 0;
+        }
+    }
 
     @media (max-width: 600px) {
         .tc-body {
@@ -549,15 +747,15 @@
         .language-container,
         .code-container,
         .tc-container,
-        .result-container {
+        .result-container,
+        .chat-container {
             max-width: 100%;
         }
     }
 </style>
 
-<!-- CodeMirror theme monokai cho trang này -->
+<!-- CodeMirror -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/theme/monokai.min.css">
-<!-- CodeMirror modes cho các ngôn ngữ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/clike/clike.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/python/python.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/php/php.min.js"></script>
@@ -565,7 +763,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/xml/xml.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/css/css.min.js"></script>
 
-<!-- Inject server data vào window, không dùng EJS bên trong script -->
 <script type="application/json"
     id="__serverData__"><%- JSON.stringify((locals.testcases || []).map(function(tc){ return { input: tc.input || '', expected: tc.expected || '' }; })) %></script>
 
@@ -573,7 +770,6 @@
     var cmEditor = null;
     window.__restoredTCs__ = JSON.parse(document.getElementById('__serverData__').textContent || '[]');
 
-    // Map ngôn ngữ -> CodeMirror mode
     var cmModeMap = {
         python: 'python',
         java: 'text/x-java',
@@ -594,8 +790,11 @@
             mode: cmModeMap[lang] || 'text/plain',
         });
         setupAICompletion();
+        restoreTestCases();
+        toggleInput();
+    });
 
-        // Phục hồi test cases từ kết quả trả về
+    function restoreTestCases() {
         var restoredTCs = window.__restoredTCs__ || [];
         if (restoredTCs.length > 0) {
             document.getElementById('tcItems').innerHTML = '';
@@ -603,23 +802,20 @@
                 addTestCaseWithData(tc.input, tc.expected);
             });
         }
+    }
 
-        toggleInput();
-    });
-
-
-    // ── AI Code Completion (Ollama local) ────────────────────────────────────
+    // ── AI Code Completion (Ollama) với debounce 3s, chỉ gợi ý phần tiếp theo ──
     var aiSuggestion = '';
-    var aiDebounce   = null;
-    var aiThinking   = false;
-    var aiLastCode   = '';
+    var aiDebounce = null;
+    var aiThinking = false;
+    var aiLastCode = '';
 
     function aiSetStatus(text, cls) {
-        var el  = document.getElementById('aiStatus');
+        var el = document.getElementById('aiStatus');
         var dot = document.getElementById('aiDot');
         if (!el) return;
         el.textContent = text;
-        el.className   = 'ai-status ' + (cls || '');
+        el.className = 'ai-status ' + (cls || '');
         if (dot) dot.className = 'ai-dot ' + (cls || '');
     }
 
@@ -630,33 +826,77 @@
         aiSetStatus('Sẵn sàng', '');
     }
 
+    function getCurrentIndent(editor, cursor) {
+        var line = editor.getLine(cursor.line);
+        var indent = line.match(/^\s*/)[0];
+        if (cursor.ch === 0 && line.trim() === '' && cursor.line > 0) {
+            var prevLine = editor.getLine(cursor.line - 1);
+            indent = prevLine.match(/^\s*/)[0];
+        }
+        return indent;
+    }
+
+    function processSuggestion(suggestion, editor, cursor) {
+        if (!suggestion) return '';
+        var codeBeforeCursor = editor.getRange({ line: 0, ch: 0 }, cursor);
+        var currentLine = editor.getLine(cursor.line);
+        var currentIndent = getCurrentIndent(editor, cursor);
+        var sugLines = suggestion.split('\n');
+        if (sugLines.length === 0) return '';
+        var firstLine = sugLines[0];
+        var afterCursorOnLine = currentLine.substring(cursor.ch);
+        if (afterCursorOnLine.trim() !== '' && firstLine.startsWith(afterCursorOnLine)) {
+            firstLine = firstLine.substring(afterCursorOnLine.length);
+        }
+        if (firstLine === '' && sugLines.length === 1) return '';
+        var processedLines = [firstLine];
+        for (var i = 1; i < sugLines.length; i++) {
+            processedLines.push(currentIndent + sugLines[i]);
+        }
+        var processed = processedLines.join('\n');
+        if (processed.trim() === '') return '';
+        return processed;
+    }
+
     function aiShowSuggestion(sug) {
-        aiSuggestion = sug;
-        var code  = cmEditor ? cmEditor.getValue() : '';
+        if (!cmEditor) return;
+        var cursor = cmEditor.getCursor();
+        var processed = processSuggestion(sug, cmEditor, cursor);
+        if (!processed) {
+            aiClearSuggestion();
+            return;
+        }
+        aiSuggestion = processed;
+        var code = cmEditor.getValue();
         var ghost = document.getElementById('ghostLayer');
         if (!ghost) return;
         function esc(s) {
-            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
         ghost.innerHTML =
             '<span style="color:transparent;white-space:pre-wrap;">' + esc(code) + '</span>' +
-            '<span class="ghost-suggestion">' + esc(sug) + '</span>';
+            '<span class="ghost-suggestion">' + esc(processed) + '</span>';
         aiSetStatus('Tab để chấp nhận', 'active');
     }
 
     function aiAccept() {
         if (!aiSuggestion || !cmEditor) return;
-        cmEditor.replaceRange(aiSuggestion, cmEditor.getCursor());
+        var cursor = cmEditor.getCursor();
+        cmEditor.replaceRange(aiSuggestion, cursor);
+        var newPos = cmEditor.getCursor();
+        cmEditor.setCursor(newPos);
         aiClearSuggestion();
         aiLastCode = cmEditor.getValue();
         clearTimeout(aiDebounce);
-        aiDebounce = setTimeout(triggerAISuggest, 2200);
     }
 
     async function triggerAISuggest() {
-        var code = cmEditor ? cmEditor.getValue() : '';
-        if (!code.trim() || code.trim().length < 5 || aiThinking) return;
-        aiClearSuggestion();
+        if (!cmEditor) return;
+        if (aiSuggestion !== '' || aiThinking) return;
+        var code = cmEditor.getValue();
+        var cursor = cmEditor.getCursor();
+        var codeBeforeCursor = cmEditor.getRange({ line: 0, ch: 0 }, cursor);
+        if (!codeBeforeCursor.trim() || codeBeforeCursor.trim().length < 5) return;
         aiThinking = true;
         aiSetStatus('AI đang suy nghĩ...', 'thinking');
         var lang = document.getElementById('languageSelect').value;
@@ -664,7 +904,7 @@
             var res = await fetch('/api/ai-suggest', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: code, language: lang })
+                body: JSON.stringify({ code: codeBeforeCursor, language: lang })
             });
             var data = await res.json();
             if (data.success && data.suggestion) {
@@ -681,28 +921,23 @@
 
     function setupAICompletion() {
         if (!cmEditor) return;
-
-        // Sync scroll ghostLayer với CodeMirror
         cmEditor.on('scroll', function () {
-            var ghost    = document.getElementById('ghostLayer');
+            var ghost = document.getElementById('ghostLayer');
             var scroller = cmEditor.getScrollerElement();
             if (ghost && scroller) {
-                ghost.scrollTop  = scroller.scrollTop;
+                ghost.scrollTop = scroller.scrollTop;
                 ghost.scrollLeft = scroller.scrollLeft;
             }
         });
-
-        // Debounce: tự gợi ý sau 1.8s ngừng gõ
-        cmEditor.on('change', function () {
+        cmEditor.on('change', function (cm, change) {
+            if (change.origin === 'setValue') return;
             aiClearSuggestion();
             var code = cmEditor.getValue();
-            if (code === aiLastCode || code.trim().length < 5) return;
+            if (code === aiLastCode) return;
             aiLastCode = code;
             clearTimeout(aiDebounce);
-            aiDebounce = setTimeout(triggerAISuggest, 1800);
+            aiDebounce = setTimeout(triggerAISuggest, 3000);
         });
-
-        // Tab: chấp nhận gợi ý hoặc indent
         cmEditor.addKeyMap({
             'Tab': function (cm) {
                 if (aiSuggestion) {
@@ -722,23 +957,20 @@
         });
     }
 
+    // ── Các hàm xử lý test case, run code ─────────────────────────────────────
     function toggleInput() {
         var lang = document.getElementById('languageSelect').value;
         var tcContainer = document.getElementById('testCaseList');
         tcContainer.style.display = lang === 'html' ? 'none' : 'block';
-
-        // Đổi mode CodeMirror
         if (cmEditor) {
             cmEditor.setOption('mode', cmModeMap[lang] || 'text/plain');
         }
     }
 
     var tcCount = 1;
-
     function addTestCase() {
         addTestCaseWithData('', '');
     }
-
     function addTestCaseWithData(inputVal, expectedVal) {
         tcCount++;
         var list = document.getElementById('tcItems');
@@ -753,39 +985,43 @@
             '<div class="tc-body">' +
             '<div class="tc-col">' +
             '<label>Input:</label>' +
-            '<textarea class="tc-input form-control" name="inputs[]" rows="3" placeholder="Nhập input...">' + inputVal + '</textarea>' +
+            '<textarea class="tc-input form-control" name="inputs[]" rows="3" placeholder="Nhập input...">' + escapeHtml(inputVal) + '</textarea>' +
             '</div>' +
             '<div class="tc-col">' +
             '<label>Expected output:</label>' +
-            '<textarea class="tc-expected form-control" name="expecteds[]" rows="3" placeholder="(tuỳ chọn)">' + expectedVal + '</textarea>' +
+            '<textarea class="tc-expected form-control" name="expecteds[]" rows="3" placeholder="(tuỳ chọn)">' + escapeHtml(expectedVal) + '</textarea>' +
             '</div>' +
             '</div>';
         list.appendChild(div);
         renumberTCs();
     }
-
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function (m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
     function removeTestCase(btn) {
         var item = btn.closest('.tc-item');
         var list = document.getElementById('tcItems');
-        if (list.children.length <= 1) return; // giữ ít nhất 1
+        if (list.children.length <= 1) return;
         item.remove();
         renumberTCs();
     }
-
     function renumberTCs() {
         var items = document.querySelectorAll('#tcItems .tc-item');
         items.forEach(function (item, i) {
             item.querySelector('.tc-label').textContent = 'Test case ' + (i + 1);
         });
     }
-
     function runCode() {
         var language = document.getElementById('languageSelect').value;
         var sourceCode = cmEditor ? cmEditor.getValue() : document.getElementById('Code').value;
-
         var form = document.createElement('form');
         form.method = 'POST';
-
         if (language === 'html') {
             form.action = '/code/execute-html';
             appendHidden(form, 'sourceCode', sourceCode);
@@ -794,8 +1030,6 @@
             form.action = '/code/execute';
             appendHidden(form, 'language', language);
             appendHidden(form, 'sourceCode', sourceCode);
-
-            // Gom tất cả inputs[] và expecteds[]
             var inputs = document.querySelectorAll('#tcItems .tc-input');
             var expecteds = document.querySelectorAll('#tcItems .tc-expected');
             inputs.forEach(function (el) {
@@ -805,11 +1039,9 @@
                 appendHidden(form, 'expecteds[]', el.value);
             });
         }
-
         document.body.appendChild(form);
         form.submit();
     }
-
     function appendHidden(form, name, value) {
         var inp = document.createElement('input');
         inp.type = 'hidden';
@@ -817,20 +1049,141 @@
         inp.value = value;
         form.appendChild(inp);
     }
-
-    // Toggle mở/đóng kết quả từng test case
     function toggleResult(header) {
         header.classList.toggle('open');
         var body = header.nextElementSibling;
         body.classList.toggle('open');
     }
-
-    // Tự động mở kết quả fail
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.tc-result:not(.status-ac) .tc-result-header').forEach(function (h) {
             h.classList.add('open');
             h.nextElementSibling.classList.add('open');
         });
+    });
+
+    // ── Chat AI (DeepSeek/Ollama) với loading animation ──────────────────────
+    const chatMessagesDiv = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendChatBtn');
+    let chatHistory = [];
+    let currentTempMessageDiv = null;
+
+    function getLoadingHtml() {
+        return '<div class="loading-dots"><span>.</span><span>.</span><span>.</span></div>';
+    }
+
+    function addChatMessage(role, content, isTemp = false) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `chat-message ${role}`;
+        if (isTemp) {
+            msgDiv.setAttribute('data-temp', 'true');
+            msgDiv.innerHTML = getLoadingHtml();
+        } else {
+            let formatted = content.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+                return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code)}</code></pre>`;
+            }).replace(/\n/g, '<br>');
+            msgDiv.innerHTML = formatted;
+            if (role === 'ai') {
+                const codeBlocks = [...content.matchAll(/```(\w*)\n([\s\S]*?)```/g)];
+                if (codeBlocks.length) {
+                    codeBlocks.forEach(block => {
+                        const fullCode = block[2].trim();
+                        const btn = document.createElement('button');
+                        btn.textContent = '📋 Chèn code này vào editor';
+                        btn.className = 'btn-insert-code';
+                        btn.onclick = () => {
+                            if (cmEditor) {
+                                cmEditor.setValue(fullCode);
+                                aiClearSuggestion();
+                            }
+                        };
+                        msgDiv.appendChild(btn);
+                    });
+                }
+            }
+        }
+        chatMessagesDiv.appendChild(msgDiv);
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+        return msgDiv;
+    }
+
+    function replaceTempMessage(finalContent, isError = false) {
+        if (currentTempMessageDiv) {
+            const newDiv = document.createElement('div');
+            newDiv.className = 'chat-message ai';
+            let formatted = finalContent.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+                return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code)}</code></pre>`;
+            }).replace(/\n/g, '<br>');
+            newDiv.innerHTML = formatted;
+            if (!isError) {
+                const codeBlocks = [...finalContent.matchAll(/```(\w*)\n([\s\S]*?)```/g)];
+                if (codeBlocks.length) {
+                    codeBlocks.forEach(block => {
+                        const fullCode = block[2].trim();
+                        const btn = document.createElement('button');
+                        btn.textContent = '📋 Chèn code này vào editor';
+                        btn.className = 'btn-insert-code';
+                        btn.onclick = () => {
+                            if (cmEditor) {
+                                cmEditor.setValue(fullCode);
+                                aiClearSuggestion();
+                            }
+                        };
+                        newDiv.appendChild(btn);
+                    });
+                }
+            }
+            currentTempMessageDiv.replaceWith(newDiv);
+            currentTempMessageDiv = null;
+        }
+    }
+
+    async function sendChatMessage() {
+        const userMsg = chatInput.value.trim();
+        if (!userMsg) return;
+        addChatMessage('user', userMsg);
+        chatHistory.push({ role: 'user', content: userMsg });
+        chatInput.value = '';
+        currentTempMessageDiv = addChatMessage('ai', '', true);
+        sendBtn.disabled = true;
+        sendBtn.style.opacity = '0.5';
+        sendBtn.style.cursor = 'not-allowed';
+        try {
+            const currentCode = cmEditor ? cmEditor.getValue() : '';
+            const language = document.getElementById('languageSelect').value;
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: chatHistory,
+                    currentCode: currentCode,
+                    language: language
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const aiReply = data.reply;
+                replaceTempMessage(aiReply, false);
+                chatHistory.push({ role: 'assistant', content: aiReply });
+            } else {
+                replaceTempMessage(`❌ Lỗi: ${data.error || 'Không thể kết nối AI'}`, true);
+            }
+        } catch (err) {
+            replaceTempMessage(`❌ Lỗi kết nối: ${err.message}`, true);
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.style.opacity = '1';
+            sendBtn.style.cursor = 'pointer';
+            currentTempMessageDiv = null;
+        }
+    }
+
+    sendBtn.addEventListener('click', sendChatMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey && !sendBtn.disabled) {
+            e.preventDefault();
+            sendChatMessage();
+        }
     });
 </script>
 

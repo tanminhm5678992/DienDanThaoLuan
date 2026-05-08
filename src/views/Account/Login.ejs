@@ -398,6 +398,24 @@
         .marquee-inner p {
             color: rgba(255, 255, 255, 0.85);
         }
+
+        .back-link {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 20;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
     </style>
 </head>
 
@@ -417,6 +435,8 @@
         <div class="snowflake">❄</div>
         <div class="snowflake">❅</div>
     </div>
+
+    <a href="/" class="back-link"><i class="fa fa-arrow-left"></i> Quay lại</a>
 
     <div class="container-center">
         <div class="login-card">
