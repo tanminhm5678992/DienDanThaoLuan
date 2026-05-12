@@ -24,7 +24,7 @@ const generateRandomPassword = (length = 10) => {
 
 const getLogin = (req, res) => {
     if (req.session.userId || req.session.adminId) return res.redirect('/');
-    res.render('Account/Login', { error: null, TenDangNhap: null });
+    res.render('Account/Login', { error: null, errorType: null, TenDangNhap: null });
 };
 
 const postLogin = async (req, res) => {
@@ -33,6 +33,7 @@ const postLogin = async (req, res) => {
     if (!TenDangNhap || !MatKhau) {
         return res.render('Account/Login', {
             error: '*Không được để trống tài khoản hoặc mật khẩu!!!',
+            errorType: 'general',
             TenDangNhap,
         });
     }
@@ -43,9 +44,17 @@ const postLogin = async (req, res) => {
         });
 
         if (memberAcc) {
+            if (!memberAcc.TrangThai) {
+                return res.render('Account/Login', {
+                    error: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên!',
+                    errorType: 'locked',
+                    TenDangNhap,
+                });
+            }
             if (!bcrypt.compareSync(MatKhau, memberAcc.MatKhau)) {
                 return res.render('Account/Login', {
                     error: 'Sai tên tài khoản hoặc mật khẩu!!',
+                    errorType: 'general',
                     TenDangNhap,
                 });
             }
@@ -58,19 +67,20 @@ const postLogin = async (req, res) => {
         });
 
         if (adminAcc) {
-            // Bỏ qua kiểm tra mật khẩu cho admin (hoặc bật lại nếu cần)
             req.session.adminId = adminAcc.MaQTV;
             return res.redirect('/');
         }
 
         return res.render('Account/Login', {
             error: 'Tài khoản không tồn tại!!',
+            errorType: 'general',
             TenDangNhap,
         });
     } catch (error) {
         console.error('postLogin error:', error);
         return res.render('Account/Login', {
             error: 'Đã xảy ra lỗi, vui lòng thử lại!',
+            errorType: 'general',
             TenDangNhap,
         });
     }
@@ -97,6 +107,10 @@ const postForgotPassword = async (req, res) => {
 
         if (!member) {
             return res.status(404).json({ success: false, message: 'Email không tồn tại trong hệ thống!' });
+        }
+
+        if (!member.TrangThai) {
+            return res.status(403).json({ success: false, message: 'Tài khoản đã bị khóa!' });
         }
 
         const newPassword = generateRandomPassword(10);
@@ -146,6 +160,11 @@ const postRegister = async (req, res) => {
         const existed = await db.ThanhVien.findOne({ where: { TenDangNhap: TenDangNhap } });
         if (existed) {
             return res.render('Account/Register', { error: 'Tên đăng nhập đã tồn tại!' });
+        }
+
+        const emailExisted = await db.ThanhVien.findOne({ where: { Email: Email } });
+        if (emailExisted) {
+            return res.render('Account/Register', { error: 'Email này đã được sử dụng!' });
         }
 
         const salt = bcrypt.genSaltSync(10);

@@ -144,6 +144,14 @@ const updateInfo = async (req, res) => {
         const { user } = await getUserFromSession(req);
         if (!user) { req.session.destroy(); return res.redirect('/account/login'); }
 
+        if (_email !== undefined && _email !== user.Email) {
+            const emailExisted = await db.ThanhVien.findOne({ where: { Email: _email } });
+            if (emailExisted) {
+                req.session.tempData = { errorMessage: 'Email này đã được sử dụng bởi tài khoản khác!' };
+                return res.redirect('/user-info');
+            }
+        }
+
         // Dùng !== undefined để cho phép xóa giá trị (gửi chuỗi rỗng)
         if (_hoTen !== undefined) user.HoTen = _hoTen;
         if (_email !== undefined) user.Email = _email;

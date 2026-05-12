@@ -294,6 +294,37 @@
             border-radius: 8px;
         }
 
+        .error-msg-locked {
+            font-size: 0.88rem;
+            margin-bottom: 0.8rem;
+            padding: 0.9rem 1rem;
+            background: rgba(251, 146, 60, 0.1);
+            border: 1px solid rgba(251, 146, 60, 0.4);
+            border-radius: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            color: #fb923c;
+        }
+
+        .error-msg-locked .lock-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .error-msg-locked .lock-text strong {
+            display: block;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+            color: #fdba74;
+        }
+
+        .error-msg-locked .lock-text span {
+            font-size: 0.8rem;
+            opacity: 0.85;
+        }
+
         .btn-submit {
             width: 100%;
             padding: 0.9rem;
@@ -446,31 +477,43 @@
             <h3>Sign In</h3>
 
             <% if (error) { %>
-                <div class="error-msg">
-                    <%= error %>
-                </div>
-                <% } %>
+                <% if (locals.errorType==='locked' ) { %>
+                    <div class="error-msg-locked">
+                        <span class="lock-icon">🔒</span>
+                        <div class="lock-text">
+                            <strong>Tài khoản đã bị khóa</strong>
+                            <span>Vui lòng liên hệ quản trị viên để được hỗ trợ mở khóa.</span>
+                        </div>
+                    </div>
+                    <% } else { %>
+                        <div class="error-msg">
+                            <%= error %>
+                        </div>
+                        <% } %>
+                            <% } %>
 
-                    <form action="/account/login" method="POST">
-                        <div class="form-group">
-                            <input type="text" name="TenDangNhap" placeholder="Username" required
-                                value="<%= TenDangNhap || '' %>">
-                        </div>
-                        <div class="form-group">
-                            <input id="password-field" type="password" name="MatKhau" placeholder="Password" required>
-                            <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
-                        </div>
-                        <div class="form-footer">
-                            <label class="remember-label">
-                                <input type="checkbox" checked> Remember Me
-                            </label>
-                            <a href="/account/forgot-password" class="forgot-link">Forgot Password?</a>
-                        </div>
-                        <button type="submit" class="btn-submit">Sign In</button>
-                    </form>
+                                <form action="/account/login" method="POST">
+                                    <div class="form-group">
+                                        <input type="text" name="TenDangNhap" placeholder="Username" required
+                                            value="<%= TenDangNhap || '' %>">
+                                    </div>
+                                    <div class="form-group">
+                                        <input id="password-field" type="password" name="MatKhau" placeholder="Password"
+                                            required>
+                                        <span toggle="#password-field"
+                                            class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                                    </div>
+                                    <div class="form-footer">
+                                        <label class="remember-label">
+                                            <input type="checkbox" checked> Remember Me
+                                        </label>
+                                        <a href="/account/forgot-password" class="forgot-link">Forgot Password?</a>
+                                    </div>
+                                    <button type="submit" class="btn-submit">Sign In</button>
+                                </form>
 
-                    <div class="divider">Don't have an account?</div>
-                    <a href="/account/register" class="signup-link">Create Account →</a>
+                                <div class="divider">Don't have an account?</div>
+                                <a href="/account/register" class="signup-link">Create Account →</a>
         </div>
     </div>
 

@@ -43,17 +43,20 @@ app.use(async (req, res, next) => {
         if (req.session.userId) {
             const tv = await db.ThanhVien.findOne({
                 where: { MaTV: req.session.userId },
-                attributes: ['TenDangNhap'],
+                attributes: ['TenDangNhap', 'AnhDaiDien'],
             });
             res.locals.username = tv ? tv.TenDangNhap : null;
+            res.locals.userAvatar = tv ? tv.AnhDaiDien : null;
         } else if (req.session.adminId) {
             const qtv = await db.QuanTriVien.findOne({
                 where: { MaQTV: req.session.adminId },
-                attributes: ['TenDangNhap'],
+                attributes: ['TenDangNhap', 'AnhDaiDien'],
             });
             res.locals.username = qtv ? qtv.TenDangNhap : null;
+            res.locals.userAvatar = qtv ? qtv.AnhDaiDien : null;
         } else {
             res.locals.username = null;
+            res.locals.userAvatar = null;
         }
 
         // Loại chủ đề cho dropdown menu

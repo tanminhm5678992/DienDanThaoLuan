@@ -382,7 +382,10 @@ const baiVietCuaToi = async (req, res) => {
     try {
         const { count, rows: baiViets } = await db.BaiViet.findAndCountAll({
             where: { MaTV: userId },
-            include: [{ model: db.ChuDe, attributes: ['TenCD'] }],
+            include: [
+                { model: db.ChuDe, attributes: ['TenCD'] },
+                { model: db.ThanhVien, attributes: ['HoTen', 'AnhDaiDien'] },
+            ],
             order: [['NgayDang', 'DESC']],
             limit,
             offset,
@@ -396,8 +399,8 @@ const baiVietCuaToi = async (req, res) => {
                 MaBV: bv.MaBV,
                 TieuDe: bv.TieuDeBV,
                 NgayDang: bv.NgayDang,
-                TenNguoiViet: '',
-                AnhDaiDien: null,
+                TenNguoiViet: bv.ThanhVien?.HoTen || '',
+                AnhDaiDien: bv.ThanhVien?.AnhDaiDien || null,
                 TrangThai: bv.TrangThai,
                 SoBL: 0,
             })),

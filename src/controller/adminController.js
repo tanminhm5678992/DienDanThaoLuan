@@ -17,7 +17,7 @@ const getDuyetBai = async (req, res) => {
 
     try {
         const { count, rows: baiViets } = await db.BaiViet.findAndCountAll({
-            where: { TrangThai: 'ChoXetDuyet' },          // ← khớp DB
+            where: { TrangThai: 'Chờ duyệt' },          // ← khớp DB
             include: [
                 { model: db.ThanhVien, attributes: ['HoTen', 'TenDangNhap'] },
                 { model: db.ChuDe, attributes: ['TenCD'] },
@@ -357,7 +357,7 @@ const getThanhVien = async (req, res) => {
 
         let thanhViens = await db.ThanhVien.findAll({
             attributes: ['MaTV', 'TenDangNhap', 'HoTen', 'Email', 'NgayThamGia',
-                'GioiTinh', 'AnhDaiDien', 'NgaySinh', 'MatKhau'],
+                'GioiTinh', 'AnhDaiDien', 'NgaySinh', 'MatKhau', 'TrangThai'],
         });
 
         if (search) {
@@ -383,11 +383,40 @@ const getThanhVien = async (req, res) => {
     }
 };
 
-// Khóa tài khoản: set MatKhau = null (giống MVC cũ)
+// Khóa tài khoản: set TrangThai = false
 const khoaThanhVien = async (req, res) => {
     try {
-        await db.ThanhVien.update({ MatKhau: null }, { where: { MaTV: req.params.id } });
+        await db.ThanhVien.update({ TrangThai: false }, { where: { MaTV: req.params.id } });
         req.session.tempData = { successMessage: 'Đã khóa tài khoản!' };
+        return res.redirect('/admin/quan-ly-thanh-vien');
+    } catch (error) {
+        res.status(500).send('Lỗi: ' + error.message);
+    }
+};
+
+// Mở khóa tài khoản: set TrangThai = true
+const moKhoaThanhVien = async (req, res) => {
+    try {
+        const thanhVien = await db.ThanhVien.findOne({ where: { MaTV: req.params.id } });
+        if (!thanhVien) return res.status(404).send('Không tìm thấy thành viên!');
+
+        await db.ThanhVien.update({ TrangThai: true }, { where: { MaTV: req.params.id } });
+
+        // Gửi thông báo mở khóa cho thành viên
+        const maTB = await generateMaTB();
+        await db.ThongBao.create({
+            MaTB: maTB,
+            NoiDung: `<NoiDung>Tài khoản của bạn đã được mở khóa. Bạn có thể đăng nhập bình thường.</NoiDung>`,
+            NgayTB: new Date(),
+            LoaiTB: 'Mở khóa tài khoản',
+            MaTV: req.params.id,
+            MaQTV: null,
+            MaDoiTuong: null,
+            LoaiDoiTuong: null,
+            TrangThai: false,
+        });
+
+        req.session.tempData = { successMessage: 'Đã mở khóa tài khoản!' };
         return res.redirect('/admin/quan-ly-thanh-vien');
     } catch (error) {
         res.status(500).send('Lỗi: ' + error.message);
@@ -460,6 +489,7 @@ export default {
     xoaChuDe,
     getThanhVien,
     khoaThanhVien,
+    moKhoaThanhVien,
     getThongBaoTong,
     postThongBaoTong,
 };

@@ -244,6 +244,13 @@
         flex-shrink: 0;
     }
 
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
     .hd-dropdown .dropdown-menu {
         background: #1a2235;
         border: 1px solid var(--border);
@@ -344,7 +351,14 @@
                     <div class="dropdown hd-dropdown">
                         <button class="user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <span class="user-avatar">
-                                <%= (locals.username || 'U' ).charAt(0).toUpperCase() %>
+                                <% if (locals.userAvatar) { %><span class="user-avatar"><img
+                                            src="/Images/<%= locals.userAvatar %>" alt="Avatar"
+                                            onerror="this.onerror=null;this.src='/Images/avatar.jpg';">
+                                    </span>
+                                    <% } else { %><span class="user-avatar">
+                                            <%= (locals.username || 'U' ).charAt(0).toUpperCase() %>
+                                        </span>
+                                        <% } %>
                             </span>
                             <%= locals.username || 'Người dùng' %>
                         </button>

@@ -49,8 +49,9 @@
                                     <h5 class="card-title">
                                         <%= member.TenDangNhap %>
                                     </h5>
-                                    <% if (!member.MatKhau) { %>
-                                        <p class="text-danger small">Tài khoản đã bị khóa</p>
+                                    <% if (member.TrangThai===false || member.TrangThai===0) { %>
+                                        <p class="text-danger small"><i class="bi bi-lock-fill"></i> Tài khoản đã bị
+                                            khóa</p>
                                         <% } %>
                                             <p class="text-muted member-fullname">
                                                 <%= member.HoTen || 'N/A' %>
@@ -67,12 +68,15 @@
                                                 Tham gia: <%= member.NgayThamGia ? new
                                                     Date(member.NgayThamGia).toLocaleDateString('vi-VN') : 'N/A' %>
                                             </p>
-                                            <div class="mt-3">
-                                                <% if (!member.MatKhau) { %>
-                                                    <button class="btn btn-danger" disabled>Khóa Tài Khoản</button>
+                                            <div class="mt-3 d-flex gap-2 justify-content-center">
+                                                <% if (member.TrangThai===false || member.TrangThai===0) { %>
+                                                    <button class="btn btn-success"
+                                                        onclick="confirmUnlock('/admin/mo-khoa-thanh-vien/<%= member.MaTV %>', '<%= member.TenDangNhap %>')">
+                                                        Mở Khóa
+                                                    </button>
                                                     <% } else { %>
                                                         <button class="btn btn-danger"
-                                                            onclick="confirmLock('/admin/khoa-thanh-vien/<%= member.MaTV %>')">
+                                                            onclick="confirmLock('/admin/khoa-thanh-vien/<%= member.MaTV %>', '<%= member.TenDangNhap %>')">
                                                             Khóa Tài Khoản
                                                         </button>
                                                         <% } %>
@@ -93,9 +97,19 @@
         </div>
         <div id="confirmModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
     background:#fff; padding:30px; border-radius:10px; z-index:1000; max-width:400px; width:90%; text-align:center;">
-            <h3>Xác Nhận</h3>
-            <p style="font-size:18px;">Bạn có chắc chắn muốn khóa tài khoản này?</p>
+            <h3>Xác Nhận Khóa Tài Khoản</h3>
+            <p style="font-size:18px;">Bạn có chắc chắn muốn khóa tài khoản <strong id="lockUsername"></strong>?</p>
             <button id="confirmButton" class="btn btn-danger mb-2 w-100">Khóa Tài Khoản</button>
+            <button class="btn btn-secondary w-100" onclick="closeModal()">Hủy</button>
+        </div>
+
+        <!-- Modal xác nhận mở khóa -->
+        <div id="unlockModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:#fff; padding:30px; border-radius:10px; z-index:1000; max-width:400px; width:90%; text-align:center;">
+            <h3>Xác Nhận Mở Khóa</h3>
+            <p style="font-size:18px;">Bạn có chắc chắn muốn mở khóa tài khoản <strong id="unlockUsername"></strong>?
+            </p>
+            <button id="unlockConfirmButton" class="btn btn-success mb-2 w-100">Mở Khóa Tài Khoản</button>
             <button class="btn btn-secondary w-100" onclick="closeModal()">Hủy</button>
         </div>
 
@@ -122,16 +136,30 @@
 
         <script>
             let actionUrl = '';
-            function confirmLock(url) {
+            function confirmLock(url, username) {
                 actionUrl = url;
+                document.getElementById('lockUsername').textContent = username || 'này';
                 document.getElementById("overlay").style.display = "block";
                 document.getElementById('confirmModal').style.display = 'block';
+            }
+            function confirmUnlock(url, username) {
+                actionUrl = url;
+                document.getElementById('unlockUsername').textContent = username || 'này';
+                document.getElementById("overlay").style.display = "block";
+                document.getElementById('unlockModal').style.display = 'block';
             }
             function closeModal() {
                 document.getElementById("overlay").style.display = "none";
                 document.getElementById('confirmModal').style.display = 'none';
+                document.getElementById('unlockModal').style.display = 'none';
             }
-            document.getElementById('confirmButton').onclick = function () {
-                window.location.href = actionUrl;
-            };
+            function submitAction() {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = actionUrl;
+                document.body.appendChild(form);
+                form.submit();
+            }
+            document.getElementById('confirmButton').onclick = submitAction;
+            document.getElementById('unlockConfirmButton').onclick = submitAction;
         </script>

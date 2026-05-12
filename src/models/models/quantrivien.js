@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     HoTen: DataTypes.STRING(80),
     AnhDaiDien: DataTypes.STRING(50),
     AnhBia: DataTypes.STRING(50),
-    Email: DataTypes.STRING(30),
+    Email: { type: DataTypes.STRING(30), unique: true },
     GioiTinh: DataTypes.STRING(3),
     SDT: DataTypes.STRING(11),
     NgaySinh: DataTypes.DATE,

@@ -82,6 +82,7 @@ router.post('/admin/quan-ly/chu-de/xoa/:id', requireAdmin, adminController.xoaCh
 
 router.get('/admin/quan-ly-thanh-vien', requireAdmin, adminController.getThanhVien);
 router.post('/admin/khoa-thanh-vien/:id', requireAdmin, adminController.khoaThanhVien);
+router.post('/admin/mo-khoa-thanh-vien/:id', requireAdmin, adminController.moKhoaThanhVien);
 
 router.get('/admin/thong-bao-tong', requireAdmin, adminController.getThongBaoTong);
 router.post('/admin/thong-bao-tong', requireAdmin, adminController.postThongBaoTong);
